@@ -1,8 +1,8 @@
 # **course**
 ## Introduction
-This repository contains source codes and material produced during the course **course**, attended in the **first/second** semester of the academic year 202**x**-202**x + 1** of master's degree in Physics of Complex Systems at the University of Turin.
+This repository contains source codes and material produced during the course Computational Geophysics Laboratory, attended in the first semester of the academic year 2023-2024 of master's degree in Physics of Complex Systems at the University of Turin.
 
-The course is teached by **professor**.
+The course is teached by professors Ferrarese and Manfrin.
 
 ## Environment
-### Repostory structure
+Virtual machine with Debian and Fortran provided by Professors.

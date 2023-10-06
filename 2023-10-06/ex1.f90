@@ -7,13 +7,13 @@ READ (*,*) grade
 ! Solution with IF THEN ELSE.
 IF (grade > 95 .AND. grade <= 100) THEN
     letter = 'A'
-ELSE IF (grade > 86 .AND. grade <= 95) THEN
+ELSE IF (grade > 86) THEN
     letter = 'B'
-ELSE IF (grade > 76 .AND. grade <= 86) THEN
+ELSE IF (grade > 76) THEN
     letter = 'C'
-ELSE IF (grade > 66 .AND. grade <= 76) THEN
+ELSE IF (grade > 66) THEN
     letter = 'D'
-ELSE IF (grade >= 0 .AND. grade <= 66) THEN
+ELSE IF (grade >= 0) THEN
     letter = 'E'
 ELSE
     letter = ' '

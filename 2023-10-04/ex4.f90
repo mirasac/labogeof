@@ -17,9 +17,10 @@ v_y = u * SIN(alpha) - g * t
 v = SQRT(v_x**2 + v_y**2)
 theta = ATAN2(v_y, v_x)
 y_max = (u * SIN(alpha))**2 / (2.0 * g)
+theta = theta / PI * 180.0
 WRITE (*,*) 'x / m = ', x
 WRITE (*,*) 'y / m = ', y
 WRITE (*,*) 'v / (m / s) = ', v
-WRITE (*,*) 'theta / deg = ', theta / PI * 180.0
+WRITE (*,*) 'theta / deg = ', theta
 WRITE (*,*) 'y_max / m = ', y_max
 END PROGRAM ex4

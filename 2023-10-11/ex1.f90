@@ -11,6 +11,7 @@ REAL :: e, r
 INTEGER :: theta
 WRITE (*,*) 'Insert eccentricity e: '
 READ (*,*) e
+! Output is formatted as shown in the example.
 WRITE (*,*) 'epsilon: ', e
 DO theta = 0, 259, 1
     r = p / (1.0 - e * COS(theta / 180.0 * PI))

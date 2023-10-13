@@ -15,6 +15,6 @@ READ (*,*) e
 WRITE (*,*) 'epsilon: ', e
 DO theta = 0, 259, 1
     r = p / (1.0 - e * COS(theta / 180.0 * PI))
-    WRITE (*,*) 'theta: ', theta, ' r: ', r
+    WRITE (*,*) 'teta : ', theta, ' r: ', r
 END DO
 END PROGRAM ex1

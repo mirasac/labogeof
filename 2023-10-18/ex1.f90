@@ -7,7 +7,6 @@ LOGICAL file_exists
 nvals = 0
 WRITE(*,*) 'Insert input file name: '
 READ(*,'(A)') filename
-WRITE(*,*) filename ! MC debug.
 INQUIRE(FILE=filename, EXIST=file_exists)
 IF (file_exists) THEN
     OPEN(UNIT=30, FILE=filename, STATUS='OLD', ACTION='READ', IOSTAT=istatus)

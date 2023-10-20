@@ -77,7 +77,6 @@ IF (iostat_1 == 0 .AND. iostat_2 == 0) THEN
         e_2 = 0.01 * RH_2 * e_w_2
         q_1 = 622.0 * e_1 / (p - e_1)
         q_2 = 622.0 * e_2 / (p - e_2)
-        !WRITE (*,*) n_1, date_1, hh_1, mm_1, T_1, T_2, RH_1, RH_2, q_1, q_2 ! MC debug.
         WRITE (30,102) n_1, date_1, hh_1, mm_1, T_1, T_2, RH_1, RH_2, q_1, q_2
         c = c + 1
     END DO

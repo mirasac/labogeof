@@ -8,6 +8,7 @@
 # Other
 **.vscode
 **.dat
+20**/*.txt
 
 # LaTeX
 **.aux

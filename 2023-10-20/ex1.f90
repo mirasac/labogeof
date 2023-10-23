@@ -56,6 +56,9 @@ IF (iostat_1 == 0 .AND. iostat_2 == 0) THEN
             READ (record_1,'(6X, A)') record_1
             READ (record_2,'(I5)') n_2
             READ (record_2,'(6X, A)') record_2
+        CASE DEFAULT
+            WRITE (*,*) 'Format for first field not available, exit program'
+            STOP
         END SELECT
         ! Extract date.
         READ (record_1,'(A10)') date_1

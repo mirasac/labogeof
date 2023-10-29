@@ -35,9 +35,7 @@ ELSE
         END IF
         ! Evaluate sums.
         IF (E /= E_NAN) THEN
-            IF (c_NAN == 0) THEN
-                E_0 = E
-            ELSE
+            IF (c_NAN > 0) THEN
                 WRITE(*,*) 'start interpolation' ! MC debug.
                 ! Start interpolation.
                 E_1 = E
@@ -55,16 +53,16 @@ ELSE
                 t_0 = t_0 + c_NAN
                 ! End interpolation.
                 c_NAN = 0
-                E_0 = E_1
                 WRITE(*,*) 'end interpolation' ! MC debug.
             END IF
+            E_0 = E
             t_0 = t_0 + 1
             IF (E_0 >= 0.0) THEN
                 E_shortwave = E_shortwave + E_0
             ELSE
                 E_infrared = E_infrared - E_0
             END IF
-            WRITE(*,*) E, E_0 ! MC debug.
+            WRITE(*,*) E_0 ! MC debug.
         ELSE
             c_NAN = c_NAN + 1
         END IF

@@ -32,8 +32,5 @@ The following is the pseudocode for the exercise.
 ```
 
 ## Release
-- Add controls and check on edge cases (e.g. trim filenames).
 - Make pseudocode more readable and in LaTeX.
 - Use package listings in LaTeX.
-- Set real numbers to double precision.
-- Remove debug lines.

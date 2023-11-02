@@ -1,0 +1,77 @@
+\documentclass[a4paper,10pt]{article}
+
+% Packages.
+\usepackage[T1]{fontenc}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+\usepackage{listings}
+%\usepackage[hidelinks]{hyperref} % Load last.
+
+% Document.
+\begin{document}
+\title{Exercise 5}
+\author{Marco Casari}
+\date{\today}
+\maketitle
+
+\lstset{
+  basicstyle=\ttfamily,
+  breakatwhitespace=false,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+%  language=[90]Fortran,
+  numbers=left
+}
+\begin{lstlisting}
+Declare parameters for: NAN value, seconds in a day, maximum number of consecutive NAN values.
+Declare real variables for: input file name, sum of shortwave radiation, sum of infrared radiation, read value, two temporary variables for interpolation, slope, offset.
+Declare integer variables for: input file IO state, read IO state, day, month, year, hour, minute, second, number of records, NAN counter, NAN index.
+Insert input file name.
+Trim filename.
+Open input file for reading.
+Check if there is an error opening file. If error, then.
+  Write that there is an error.
+If no error opening file, then.
+  Set NAN counter to 0.
+  Set first temporary variable to 0.
+  Set number of records to 0.
+  Set sum of shortwave radiation to 0.
+  Set sum of infrared radiation to 0.
+  Read header of input file.
+  Loop.
+    Read line.
+    If no line left to read, then.
+      Exit loop.
+    Else if error reading file, then.
+      Write that there is an error reading file.
+      Exit loop.
+    Else if NAN counter is greater than maximum number of consecutive NAN values, then.
+      Write that maximum number of consecutive NAN values is exceeded.
+      Exit loop.
+    If read value is not NAN value, then.
+      If NAN counter is greater than 0, then
+        Set second temporary variable to read value.
+        Evaluate and set slope.
+        Evaluate and set offset.
+        Loop NAN index from 1 to NAN counter stepping by 1.
+          Set first temporary variable to interpolated value.
+          If first temporary variable is non negative, then.
+            Add first temporary variable to sum of shortwave radiation.
+          Else.
+            Add first temporary variable to sum of infrared radiation.
+        Add NAN counter to number of records.
+      Set first temporary variable to read value.
+      Add 1 to number of records.
+      If first temporary variable is non negative, then.
+        Add first temporary variable to sum of shortwave radiation.
+      Else.
+        Add first temporary variable to sum of infrared radiation.
+    Else.
+      Add 1 to NAN counter.
+  Evaluate and write daily energy of shortwave radiation.
+  Evaluate and write daily energy of infrared radiation.
+Close input file.
+Exit program.
+\end{lstlisting}
+\end{document}

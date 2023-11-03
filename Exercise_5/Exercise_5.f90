@@ -67,8 +67,8 @@ ELSE
         END IF
     END DO
     ! Print output.
-    WRITE(*, 100) 'shortwave', E_shortwave * t_0 * SECONDS_PER_MINUTE / 1e6
-    WRITE(*, 100) 'infrared', E_infrared * t_0 * SECONDS_PER_MINUTE / 1e6
+    WRITE(*, 100) 'shortwave', E_shortwave * SECONDS_PER_MINUTE / 1e6
+    WRITE(*, 100) 'infrared', E_infrared * SECONDS_PER_MINUTE / 1e6
 END IF
 CLOSE(30)
 STOP

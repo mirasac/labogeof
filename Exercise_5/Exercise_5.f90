@@ -2,7 +2,7 @@ PROGRAM Exercise_5
 IMPLICIT NONE
 ! Declare parameters.
 REAL, PARAMETER :: E_NAN = -999.0  ! W / m^2
-REAL, PARAMETER :: SECONDS_PER_DAY = 86400
+REAL, PARAMETER :: SECONDS_PER_MINUTE = 60.0
 INTEGER, PARAMETER :: N_NAN_MAX = 4
 ! Declare variables.
 CHARACTER(LEN=128) :: filename
@@ -67,8 +67,8 @@ ELSE
         END IF
     END DO
     ! Print output.
-    WRITE(*, 100) 'shortwave', E_shortwave * SECONDS_PER_DAY / 1e6
-    WRITE(*, 100) 'infrared', E_infrared * SECONDS_PER_DAY / 1e6
+    WRITE(*, 100) 'shortwave', E_shortwave * t_0 * SECONDS_PER_MINUTE / 1e6
+    WRITE(*, 100) 'infrared', E_infrared * t_0 * SECONDS_PER_MINUTE / 1e6
 END IF
 CLOSE(30)
 STOP

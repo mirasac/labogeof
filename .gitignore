@@ -9,6 +9,7 @@
 **.vscode
 **.dat
 20**/*.txt
+**.mod
 
 # LaTeX
 **.aux

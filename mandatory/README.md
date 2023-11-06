@@ -7,5 +7,5 @@ First mandatory exercise requested by Professor Manfrin.
 ## Pseudocode
 Pseudocode for the exercise is in file `Exercise_5.pdf`.
 
-# Matrix filtering
+# Matrix_filter
 Second mandatory exercise requested by Professor Ferrarese.

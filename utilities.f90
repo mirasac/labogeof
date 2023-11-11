@@ -6,12 +6,12 @@ INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in
 CONTAINS
 
 ! Subroutine to sanitize the specified filename.
-! OUT parameters:
+! OUT arguments:
 !   filename
-! IN optional parameters:
+! IN optional arguments:
 !   description
 SUBROUTINE sanitize_filename(filename, description)
-! Parameters declaration.
+! Dummy arguments declaration.
 CHARACTER(LEN=*), INTENT(OUT) :: filename
 CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: description
 ! Variables declaration.

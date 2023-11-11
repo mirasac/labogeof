@@ -2,8 +2,8 @@ PROGRAM matrix_filter
 USE utilities
 IMPLICIT NONE
 ! Declare variables.
-CHARACTER(LEN=128) :: filename_input, field, filename_mean, filename_kernel, filename_collapse
-INTEGER :: iostat_input, ncols, nrows, stat_T, stat_T_avg, stat_y, i, iostat_mean, iostat_kernel, iostat_collapse
+CHARACTER(LEN=128) :: filename_input, field, filename_mean, filename_filtered_matrix, filename_average_matrix
+INTEGER :: iostat_input, ncols, nrows, stat_T, stat_T_avg, stat_y, i, iostat_mean, iostat_filtered_matrix, iostat_average_matrix
 REAL :: xllcorner, yllcorner, cellsize, NODATA_value
 REAL, ALLOCATABLE :: T (:, :), T_avg (:)  ! C
 REAL, ALLOCATABLE :: y (:)

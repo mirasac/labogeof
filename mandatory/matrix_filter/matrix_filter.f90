@@ -8,7 +8,7 @@ REAL :: xllcorner, yllcorner, cellsize, NODATA_value
 REAL, ALLOCATABLE :: T (:, :), T_avg (:)  ! C
 REAL, ALLOCATABLE :: y (:)
 ! Program body.
-!CALL sanitize_filename(filename_input, 'input')
+!CALL get_filename(filename_input, 'input')
 filename_input = 'monthly_temperature_sample.txt'  ! MC debug, for quick testing.
 OPEN(UNIT=30, FILE=filename_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input /= 0) THEN
@@ -33,8 +33,8 @@ ELSE
             READ(30, *) T(i, :)
         END DO
         ! MC continue.
-        !CALL sanitize_filename(filename_mean, 'latitudinal mean temperature')
-        !CALL sanitize_filename(filename_kernel, 'filtered matrix')
+        !CALL get_filename(filename_mean, 'latitudinal mean temperature')
+        !CALL get_filename(filename_kernel, 'filtered matrix')
     END IF
     DEALLOCATE(T, T_avg, y)
 END IF

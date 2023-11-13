@@ -3,14 +3,15 @@ IMPLICIT NONE
 PUBLIC
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
+INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 308)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 CONTAINS
 
-! Subroutine to sanitize the specified filename.
+! Get filename from standard input and store in specified variable.
 ! OUT arguments:
 !   filename
 ! IN optional arguments:
 !   description
-SUBROUTINE sanitize_filename(filename, description)
+SUBROUTINE get_filename(filename, description)
 ! Dummy arguments declaration.
 CHARACTER(LEN=*), INTENT(OUT) :: filename
 CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: description

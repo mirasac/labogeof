@@ -13,27 +13,47 @@ CONTAINS
 !   filename
 ! IN optional arguments:
 !   description
-SUBROUTINE get_filename(filename, description)
+!   action_file
+!     String, specify file action, READ or WRITE, default READ.
+SUBROUTINE get_filename(filename, description, action_file)
     ! Dummy arguments declaration.
     CHARACTER(LEN=*), INTENT(OUT) :: filename
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: description
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: action_file
     ! Variables declaration.
     CHARACTER(LEN=5) :: string_write
     LOGICAL :: file_exists
+    CHARACTER(LEN=:), ALLOCATABLE :: action_file_
     ! Build insert request message.
     IF (PRESENT(description)) THEN
         string_write = ' for '
     ELSE
         string_write = ''
     END IF
+    ! Set default action for file.
+    IF (PRESENT(action_file)) THEN
+        action_file_ = TRIM(action_file)
+    ELSE
+        action_file_ = 'READ'
+    END IF
     ! Loop insert request.
     DO
         WRITE(*, '(4A)') 'Insert filename', string_write, TRIM(description), ':'
         READ(*, '(A)') filename
-        filename = TRIM(filename)
         INQUIRE(FILE=filename, EXIST=file_exists)
-        IF (file_exists) EXIT
-        WRITE(*, '(2A)') 'Error opening file ', filename
+        IF (action_file_ == 'READ' .OR. action_file_ == 'read') THEN
+            IF (file_exists) THEN
+                EXIT
+            ELSE
+                WRITE(*, '(3A)') 'Error: file ', TRIM(filename), ' does not exist'
+            END IF
+        ELSE IF (action_file_ == 'WRITE' .OR. action_file_ == 'write') THEN
+            IF (file_exists) THEN
+                WRITE(*, '(3A)') 'Warning: file ', TRIM(filename), ' is already present'
+            ELSE
+                EXIT
+            END IF
+        END IF
     END DO
 END SUBROUTINE
 
@@ -54,7 +74,7 @@ SUBROUTINE mat_load(unit_in, matrix)
     INTEGER :: stat_matrix_tmp
     ! Read data from unit.
     matrix_shape = SHAPE(matrix)
-    ALLOCATE(matrix_tmp (matrix_shape(2), matrix_shape(1)), STAT=stat_matrix_tmp)
+    ALLOCATE(matrix_tmp(matrix_shape(2), matrix_shape(1)), STAT=stat_matrix_tmp)
     READ(unit_in, *) matrix_tmp
     ! Transpose read data.
     IF (stat_matrix_tmp .GT. 0) THEN

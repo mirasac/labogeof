@@ -4,7 +4,8 @@ PRIVATE
 PUBLIC :: DP, get_filename, mat_load, mat_write
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
-INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
+!INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
+INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(5, 3)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 INTEGER, PARAMETER :: WK = DP  ! Working kind.
 CONTAINS
 
@@ -21,9 +22,8 @@ SUBROUTINE get_filename(filename, description, action_file)
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: description
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: action_file
     ! Variables declaration.
-    CHARACTER(LEN=5) :: string_write
+    CHARACTER(LEN=5) :: string_write, action_file_
     LOGICAL :: file_exists
-    CHARACTER(LEN=:), ALLOCATABLE :: action_file_
     ! Build insert request message.
     IF (PRESENT(description)) THEN
         string_write = ' for '
@@ -32,7 +32,7 @@ SUBROUTINE get_filename(filename, description, action_file)
     END IF
     ! Set default action for file.
     IF (PRESENT(action_file)) THEN
-        action_file_ = TRIM(action_file)
+        action_file_ = action_file
     ELSE
         action_file_ = 'READ'
     END IF
@@ -41,13 +41,13 @@ SUBROUTINE get_filename(filename, description, action_file)
         WRITE(*, '(4A)') 'Insert filename', string_write, TRIM(description), ':'
         READ(*, '(A)') filename
         INQUIRE(FILE=filename, EXIST=file_exists)
-        IF (action_file_ == 'READ' .OR. action_file_ == 'read') THEN
+        IF (TRIM(action_file_) == 'READ' .OR. TRIM(action_file_) == 'read') THEN
             IF (file_exists) THEN
                 EXIT
             ELSE
                 WRITE(*, '(3A)') 'Error: file ', TRIM(filename), ' does not exist'
             END IF
-        ELSE IF (action_file_ == 'WRITE' .OR. action_file_ == 'write') THEN
+        ELSE IF (TRIM(action_file_) == 'WRITE' .OR. TRIM(action_file_) == 'write') THEN
             IF (file_exists) THEN
                 WRITE(*, '(3A)') 'Warning: file ', TRIM(filename), ' is already present'
             ELSE
@@ -99,11 +99,11 @@ SUBROUTINE mat_write(matrix, unit_out)
     INTEGER :: i
     ! Write matrix to unit.
     IF (PRESENT(unit_out)) THEN
-        DO i = 1, SIZE(matrix, 1)
+        DO i = 1, SIZE(matrix, 1), 1
             WRITE(unit_out, *) matrix(i, :)
         END DO
     ELSE
-        DO i = 1, SIZE(matrix, 1)
+        DO i = 1, SIZE(matrix, 1), 1
             WRITE(*, *) matrix(i, :)
         END DO
     END IF

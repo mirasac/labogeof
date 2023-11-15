@@ -1,5 +1,5 @@
 MODULE filters
-USE utilities, ONLY : WK => DP, mat_write
+USE utilities, ONLY : WK => SP, mat_write
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: conv2d

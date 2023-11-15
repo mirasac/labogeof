@@ -1,12 +1,12 @@
 MODULE utilities
 IMPLICIT NONE
 PRIVATE
-PUBLIC :: DP, get_filename, mat_load, mat_write
+PUBLIC :: DP, SP, get_filename, mat_load, mat_write
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
-!INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
-INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(5, 3)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
-INTEGER, PARAMETER :: WK = DP  ! Working kind.
+INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
+INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.
+INTEGER, PARAMETER :: WK = SP  ! Working kind.
 CONTAINS
 
 ! Get filename from standard input and store in specified variable.

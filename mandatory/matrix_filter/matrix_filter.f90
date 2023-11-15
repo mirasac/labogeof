@@ -1,6 +1,6 @@
 PROGRAM matrix_filter
 ! Matrices are expressed in transposed form columns x rows to leverage the capabilities of Fortran.
-USE utilities, ONLY : WK => DP, get_filename, mat_load, mat_write
+USE utilities, ONLY : WK => SP, get_filename, mat_load, mat_write
 USE filters, ONLY : conv2d
 IMPLICIT NONE
 ! Declare variables.

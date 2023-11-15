@@ -95,11 +95,17 @@ SUBROUTINE mat_write(matrix, unit_out)
     ! Dummy arguments declaration.
     REAL(KIND=WK), INTENT(IN) :: matrix(:, :)
     INTEGER, INTENT(IN), OPTIONAL :: unit_out
+    ! Variables declaration.
+    INTEGER :: i
     ! Write matrix to unit.
     IF (PRESENT(unit_out)) THEN
-        WRITE(unit_out, *) TRANSPOSE(matrix)
+        DO i = 1, SIZE(matrix, 1)
+            WRITE(unit_out, *) matrix(i, :)
+        END DO
     ELSE
-        WRITE(*, *) TRANSPOSE(matrix)
+        DO i = 1, SIZE(matrix, 1)
+            WRITE(*, *) matrix(i, :)
+        END DO
     END IF
 END SUBROUTINE
 

@@ -50,9 +50,8 @@ SUBROUTINE get_filename(filename, description, action_file)
         ELSE IF (TRIM(action_file_) == 'WRITE' .OR. TRIM(action_file_) == 'write') THEN
             IF (file_exists) THEN
                 WRITE(*, '(3A)') 'Warning: file ', TRIM(filename), ' is already present'
-            ELSE
-                EXIT
             END IF
+            EXIT
         END IF
     END DO
 END SUBROUTINE

@@ -1,12 +1,13 @@
 PROGRAM matrix_filter
 ! Matrices are expressed in transposed form columns x rows to leverage the capabilities of Fortran.
-USE utilities, ONLY : WP => DP, get_filename, mat_load, mat_write
+USE utilities, ONLY : WK => DP, get_filename, mat_load, mat_write
 IMPLICIT NONE
 ! Declare variables.
-CHARACTER(LEN=128) :: filename_input, field, filename_avg, filename_filtered_matrix, filename_average_matrix
-INTEGER :: iostat_input, ncols, nrows, stat_T, stat_T_avg, i_row, iostat_avg, iostat_filtered_matrix, iostat_average_matrix
-REAL(KIND=WP) :: xllcorner, yllcorner, cellsize, NODATA_value
-REAL(KIND=WP), ALLOCATABLE :: T(:, :), T_avg(:)  ! C
+CHARACTER(LEN=128) :: filename_input, field, filename_avg, filename_filtered, filename_average
+INTEGER :: iostat_input, ncols, nrows, stat_T, stat_T_avg, i_row, iostat_avg, iostat_filtered, iostat_average
+REAL(KIND=WK) :: xllcorner, yllcorner, cellsize, NODATA_value
+REAL(KIND=WK), ALLOCATABLE :: T(:, :), T_avg(:)  ! C
+REAL(KIND=WK) :: kernel_filtered(3, 3), kernel_average(9, 9)
 ! Program body.
 !CALL get_filename(filename_input, 'input', 'READ')
 filename_input = 'monthly_temperature_sample.txt'  ! MC debug, for quick testing.
@@ -40,8 +41,14 @@ ELSE
             WRITE(31, *) T_avg
         END IF
         CLOSE(31)
+        ! Evaluate filtered matrix.
+        !CALL get_filename(filename_filtered, 'filtered matrix', 'WRITE')
+        filename_filtered = 'fltered_matrix.txt'  ! MC debug, for quick testing.
+        kernel_filtered = RESHAPE((/0.3_WK, 0.5_WK, 0.3_WK, 0.5_WK, 1.0_WK, 0.5_WK, 0.3_WK, 0.5_WK, 0.3_WK/), (/3, 3/))
         ! MC continue.
-        !CALL get_filename(filename_kernel, 'filtered matrix', 'WRITE')
+        !CALL get_filename(filename_average, 'average matrix', 'WRITE')
+        filename_average = 'average_matrix.txt'  ! MC debug, for quick testing.
+        kernel_average = 1.0_WK / 81.0_WK
         ! Deallocate arrays.
         DEALLOCATE(T, T_avg)
     END IF

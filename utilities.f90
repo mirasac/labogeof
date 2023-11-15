@@ -5,7 +5,7 @@ PUBLIC :: DP, get_filename, mat_load, mat_write
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
-INTEGER, PARAMETER :: WP = DP  ! Working precision.
+INTEGER, PARAMETER :: WK = DP  ! Working kind.
 CONTAINS
 
 ! Get filename from standard input and store in specified variable.
@@ -67,10 +67,10 @@ END SUBROUTINE
 SUBROUTINE mat_load(unit_in, matrix)
     ! Dummy arguments declaration.
     INTEGER, INTENT(IN) :: unit_in
-    REAL(KIND=WP), INTENT(OUT) :: matrix(:, :)
+    REAL(KIND=WK), INTENT(OUT) :: matrix(:, :)
     ! Variables declaration.
     INTEGER :: matrix_shape(2)
-    REAL(KIND=WP), ALLOCATABLE :: matrix_tmp(:, :)
+    REAL(KIND=WK), ALLOCATABLE :: matrix_tmp(:, :)
     INTEGER :: stat_matrix_tmp
     ! Read data from unit.
     matrix_shape = SHAPE(matrix)
@@ -93,7 +93,7 @@ END SUBROUTINE
 !     Integer, unit to write the matrix, default standard output.
 SUBROUTINE mat_write(matrix, unit_out)
     ! Dummy arguments declaration.
-    REAL(KIND=WP), INTENT(IN) :: matrix(:, :)
+    REAL(KIND=WK), INTENT(IN) :: matrix(:, :)
     INTEGER, INTENT(IN), OPTIONAL :: unit_out
     ! Write matrix to unit.
     IF (PRESENT(unit_out)) THEN

@@ -109,10 +109,10 @@ SUBROUTINE mat_write(matrix, unit_out)
     END IF
 END SUBROUTINE
 
-! Count lines present in the specified unit.
+! Count lines from the beginning of the file.
 ! IN arguments:
 !   unit_file
-!     Integer, unit opened with read action.
+!     Integer, unit of file opened with read action.
 ! IN optional arguments:
 !   skip
 !     Integer, number of lines to skip starting from the beginning,
@@ -130,12 +130,14 @@ INTEGER FUNCTION count_lines(unit_file, skip)
         skip_ = 0
     END IF
     ! Count lines.
+    REWIND(unit_file)
     count_lines = 0
     DO
         READ(unit_file, *, IOSTAT=iostat_file)
         IF (iostat_file < 0) EXIT
         count_lines = count_lines + 1
     END DO
+    REWIND(unit_file)
     ! Skip lines from the beginning of unit.
     count_lines = count_lines - skip_
 END FUNCTION

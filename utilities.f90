@@ -1,7 +1,7 @@
 MODULE utilities
 IMPLICIT NONE
 PRIVATE
-PUBLIC :: DP, SP, get_filename, mat_load, mat_write
+PUBLIC :: DP, SP, get_filename, mat_load, mat_write, count_lines
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
@@ -88,6 +88,7 @@ END SUBROUTINE
 ! IN arguments:
 !   matrix
 !     Real rank 2 array.
+! IN optional arguments:
 !   unit_out
 !     Integer, unit to write the matrix, default standard output.
 SUBROUTINE mat_write(matrix, unit_out)
@@ -107,5 +108,36 @@ SUBROUTINE mat_write(matrix, unit_out)
         END DO
     END IF
 END SUBROUTINE
+
+! Count lines present in the specified unit.
+! IN arguments:
+!   unit_file
+!     Integer, unit opened with read action.
+! IN optional arguments:
+!   skip
+!     Integer, number of lines to skip starting from the beginning,
+!     default 0.
+INTEGER FUNCTION count_lines(unit_file, skip)
+    ! Dummy arguments declaration.
+    INTEGER, INTENT(IN) :: unit_file
+    INTEGER, INTENT(IN), OPTIONAL :: skip
+    ! Variables declaration.
+    INTEGER :: skip_, iostat_file
+    ! Set default values.
+    IF (PRESENT(skip)) THEN
+        skip_ = skip
+    ELSE
+        skip_ = 0
+    END IF
+    ! Count lines.
+    count_lines = 0
+    DO
+        READ(unit_file, *, IOSTAT=iostat_file)
+        IF (iostat_file < 0) EXIT
+        count_lines = count_lines + 1
+    END DO
+    ! Skip lines from the beginning of unit.
+    count_lines = count_lines - skip_
+END FUNCTION
 
 END MODULE utilities

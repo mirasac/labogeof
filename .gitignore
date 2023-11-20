@@ -10,6 +10,8 @@
 **.dat
 20**/*.txt
 **.mod
+mandatory/matrix_filter/*.txt
+mandatory/sonico/*.txt
 
 # LaTeX
 **.aux

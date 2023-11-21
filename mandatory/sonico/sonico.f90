@@ -1,9 +1,13 @@
 PROGRAM sonico
 USE utilities, ONLY : WK => SP, get_filename, count_lines
+USE sonico_module, ONLY : velocity_t
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=128) :: filename_input, field, filename_output
-INTEGER :: iostat_input, n_data, n_analog, stat_analog
+INTEGER :: iostat_input, n_data, n_analog, stat_air, stat_c, stat_analog
+TYPE(velocity_t), ALLOCATABLE :: air(:)
+REAL(KIND=WK), ALLOCATABLE :: c(:)
+INTEGER, ALLOCATABLE :: analog(:, :)
 ! Program body.
 !CALL get_filename(filename_input, 'input', 'READ')
 filename_input = 'sonico.dat' ! MC debug, to speed up testing.
@@ -17,9 +21,32 @@ ELSE
     READ(30, *) field, field, field, n_analog
     READ(30, *) field
     ! Allocate arrays.
-    ! MC continue with loop on data.
+    ALLOCATE(air(n_data), STAT=stat_air)
+    ALLOCATE(c(n_data), STAT=stat_c)
+    ALLOCATE(analog(n_data, n_analog), STAT=stat_analog)
+    ! Load data from input file.
+    IF (stat_air > 0) THEN
+        WRITE(*, 101) 'air velocity values'
+    ELSE IF (stat_c > 0) THEN
+        WRITE(*, 101) 'sound speed values'
+    ELSE IF (stat_analog > 0) THEN
+        WRITE(*, 101) 'analog values'
+    ELSE
+        ! MC continue with loop on data.
+    END IF
+    ! Deallocate arrays.
+    IF (ALLOCATED(air)) THEN
+        DEALLOCATE(air)
+    END IF
+    IF (ALLOCATED(c)) THEN
+        DEALLOCATE(c)
+    END IF
+    IF (ALLOCATED(analog)) THEN
+        DEALLOCATE(analog)
+    END IF
 END IF
 CLOSE(30)
 STOP
 100 FORMAT('Error opening file ', A)
+101 FORMAT('Error allocating memory for ', A)
 END PROGRAM sonico

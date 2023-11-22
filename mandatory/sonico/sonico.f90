@@ -4,7 +4,7 @@ USE sonico_module, ONLY : velocity_t
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=128) :: filename_input, field, filename_output
-INTEGER :: iostat_input, n_data, n_analog, stat_air, stat_c, stat_analog
+INTEGER :: iostat_input, n_data, n_analog, stat_air, stat_c, stat_analog, i_data, i_analog
 TYPE(velocity_t), ALLOCATABLE :: air(:)
 REAL(KIND=WK), ALLOCATABLE :: c(:)
 INTEGER, ALLOCATABLE :: analog(:, :)
@@ -32,7 +32,11 @@ ELSE
     ELSE IF (stat_analog > 0) THEN
         WRITE(*, 101) 'analog values'
     ELSE
-        ! MC continue with loop on data.
+        DO i_data = 1, n_data, 1
+            READ(30, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &
+                (analog(i_data, i_analog), i_analog = 1, n_analog, 1)
+        END DO
+        ! MC continue with rotation of SDR.
     END IF
     ! Deallocate arrays.
     IF (ALLOCATED(air)) THEN

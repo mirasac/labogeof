@@ -1,12 +1,13 @@
 MODULE utilities
 IMPLICIT NONE
 PRIVATE
-PUBLIC :: DP, SP, get_filename, mat_load, mat_write, count_lines
+PUBLIC :: DP, SP, PI, get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.
 INTEGER, PARAMETER :: WK = SP  ! Working kind.
+REAL(KIND=WK) :: PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679_WK
 CONTAINS
 
 ! Get filename from standard input and store in specified variable.
@@ -112,10 +113,10 @@ END SUBROUTINE
 ! Count lines from the beginning of the file.
 ! IN arguments:
 !   unit_file
-!     Integer, unit of file opened with read action.
+!     Scalar integer, unit of file opened with read action.
 ! IN optional arguments:
 !   skip
-!     Integer, number of lines to skip starting from the beginning,
+!     Scalar, integer, number of lines to skip starting from the beginning,
 !     default 0.
 INTEGER FUNCTION count_lines(unit_file, skip)
     ! Dummy arguments declaration.
@@ -141,5 +142,50 @@ INTEGER FUNCTION count_lines(unit_file, skip)
     ! Skip lines from the beginning of unit.
     count_lines = count_lines - skip_
 END FUNCTION
+
+! Convert decimal degree to radians.
+! IN arguments:
+!   dd
+REAL(KIND=WK) FUNCTION dd2rad(dd)
+    ! Dummy arguments declaration.
+    REAL(KIND=WK), INTENT(IN) :: dd
+    ! Degree conversion.
+    dd2rad = dd * PI / 180.0_WK
+END FUNCTION
+
+! Build 3-dimensional rotation matrix.
+! IN arguments:
+!   original
+!     Real rank 1 array, vector to be rotated.
+!   phi
+!     Scalar real.
+!   theta
+!     Scalar real.
+!   psi
+!     Scalar real.
+! OUT arguments:
+!   rotated
+!     Real rank 1 array, original vector rotated with specified angles.
+SUBROUTINE rotate_euler(original, phi, theta, psi, rotated)
+    ! Dummy arguments declaration.
+    REAL(KIND=WK), INTENT(IN) :: original(3)
+    REAL(KIND=WK), INTENT(IN) :: phi
+    REAL(KIND=WK), INTENT(IN) :: theta
+    REAL(KIND=WK), INTENT(IN) :: psi
+    REAL(KIND=WK), INTENT(OUT) :: rotated(3)
+    ! Variables declaration.
+    REAL(KIND=WK) :: matrix(3, 3)
+    ! Apply rotation.
+    matrix(1, 1) = COS(psi) * COS(phi) - COS(theta) * SIN(phi) * SIN(psi)
+    matrix(2, 1) = COS(psi) * SIN(phi) + COS(theta) * COS(phi) * SIN(psi)
+    matrix(3, 1) = SIN(theta) * SIN(psi)
+    matrix(1, 2) = - SIN(psi) * COS(phi) - COS(theta) * SIN(phi) * COS(psi)
+    matrix(2, 2) = - SIN(psi) * SIN(phi) + COS(theta) * COS(phi) * COS(psi)
+    matrix(3, 2) = SIN(theta) * COS(psi)
+    matrix(1, 3) = SIN(theta) * SIN(phi)
+    matrix(2, 3) = - SIN(theta) * COS(phi)
+    matrix(3, 3) = COS(theta)
+    rotated = MATMUL(matrix, original)
+END SUBROUTINE
 
 END MODULE utilities

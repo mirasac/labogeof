@@ -6,7 +6,7 @@ IMPLICIT NONE
 CHARACTER(LEN=10), PARAMETER :: filename_config = 'config.nml'
 CHARACTER(LEN=PATH_MAX) :: filename_input, filename_output
 NAMELIST /namelist_config/ filename_input, filename_output
-CHARACTER(LEN=512) :: field
+CHARACTER(LEN=512) :: h1, h2_1, h2_2, h2_3, h3, h4
 INTEGER :: iostat_config, iostat_input, iostat_output, n_data, n_analog, stat_air, stat_c, stat_analog, i_data, i_analog
 TYPE(velocity_t), ALLOCATABLE :: air(:)
 REAL(KIND=WK), ALLOCATABLE :: c(:)
@@ -35,9 +35,10 @@ ELSE IF (iostat_output /= 0) THEN
 ELSE
     ! Read data about input file content.
     n_data = count_lines(30, skip=4)
-    READ(30, *) field
-    READ(30, *) field, field, field, n_analog
-    READ(30, *) field
+    READ(30, '(A)') h1
+    READ(30, *) h2_1, h2_2, h2_3, n_analog
+    READ(30, '(A)') h3
+    READ(30, '(A)') h4
     ! Allocate arrays.
     ALLOCATE(air(n_data), STAT=stat_air)
     ALLOCATE(c(n_data), STAT=stat_c)
@@ -59,6 +60,11 @@ ELSE
         WRITE(*, *) 'Insert psi: '
         READ(*, *) psi
         psi = dd2rad(psi)
+        ! Write header lines in output file.
+        WRITE(31, '(A)') TRIM(h1)
+        WRITE(31, '(3(A, 1X), I2)') TRIM(h2_1), TRIM(h2_2), TRIM(h2_3), n_analog
+        WRITE(31, '(A)') TRIM(h3)
+        WRITE(31, '(A)') TRIM(h4)
         ! Load data from input file and insert in output file.
         DO i_data = 1, n_data, 1
             READ(30, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &
@@ -72,7 +78,8 @@ ELSE
             air(i_data)%v = v(2)
             air(i_data)%w = v(3)
             ! Write data in output file.
-            ! MC continue.
+            WRITE(31, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &
+                (analog(i_data, i_analog), i_analog = 1, n_analog, 1)
         END DO
     END IF
     ! Deallocate arrays.

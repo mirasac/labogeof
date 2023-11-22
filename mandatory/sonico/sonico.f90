@@ -1,21 +1,37 @@
 PROGRAM sonico
-USE utilities, ONLY : WK => SP, get_filename, count_lines, dd2rad, rotate_euler
+USE utilities, ONLY : PATH_MAX, WK => SP, get_filename, count_lines, dd2rad, rotate_euler
 USE sonico_module, ONLY : velocity_t
 IMPLICIT NONE
 ! Declare variables.
-CHARACTER(LEN=128) :: filename_input, field, filename_output
-INTEGER :: iostat_input, n_data, n_analog, stat_air, stat_c, stat_analog, i_data, i_analog
+CHARACTER(LEN=10), PARAMETER :: filename_config = 'config.nml'
+CHARACTER(LEN=PATH_MAX) :: filename_input, filename_output
+NAMELIST /namelist_config/ filename_input, filename_output
+CHARACTER(LEN=512) :: field
+INTEGER :: iostat_config, iostat_input, iostat_output, n_data, n_analog, stat_air, stat_c, stat_analog, i_data, i_analog
 TYPE(velocity_t), ALLOCATABLE :: air(:)
 REAL(KIND=WK), ALLOCATABLE :: c(:)
 INTEGER, ALLOCATABLE :: analog(:, :)
 REAL(KIND=WK) :: phi, theta, psi
 REAL(KIND=WK) :: v(3)
-! Program body.
-!CALL get_filename(filename_input, 'input', 'READ')
-filename_input = 'sonico.dat' ! MC debug, to speed up testing.
+! Read configurations.
+OPEN(UNIT=30, FILE=filename_config, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
+IF (iostat_config /= 0) THEN
+    WRITE(*, 100) filename_config
+    !CALL get_filename(filename_input, 'input', 'WRITE')
+    filename_input = 'sonico.dat' ! MC debug, to speed up testing.
+    !CALL get_filename(filename_output, 'output', 'WRITE')
+    filename_output = 'output.dat' ! MC debug, to speed up testing.
+ELSE
+    READ(30, NML=namelist_config)
+END IF
+CLOSE(30)
+! Open input and output files.
 OPEN(UNIT=30, FILE=filename_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
+OPEN(UNIT=31, FILE=filename_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
 IF (iostat_input /= 0) THEN
     WRITE(*, 100) filename_input
+ELSE IF (iostat_output /= 0) THEN
+    WRITE(*, 100) filename_output
 ELSE
     ! Read data about input file content.
     n_data = count_lines(30, skip=4)
@@ -33,7 +49,7 @@ ELSE
     ELSE IF (stat_analog > 0) THEN
         WRITE(*, 101) 'analog values'
     ELSE
-        ! Get rotation matrix.
+        ! Get rotation angles.
         WRITE(*, *) 'Insert phi: '
         READ(*, *) phi
         phi = dd2rad(phi)
@@ -43,8 +59,6 @@ ELSE
         WRITE(*, *) 'Insert psi: '
         READ(*, *) psi
         psi = dd2rad(psi)
-        ! Open output file.
-        ! MC continue.
         ! Load data from input file and insert in output file.
         DO i_data = 1, n_data, 1
             READ(30, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &

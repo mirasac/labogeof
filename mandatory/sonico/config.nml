@@ -1,0 +1,4 @@
+&NAMELIST_CONFIG
+ FILENAME_INPUT="sonico.dat",
+ FILENAME_OUTPUT="output.dat",
+ /

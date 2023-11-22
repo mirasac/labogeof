@@ -1,7 +1,7 @@
 MODULE utilities
 IMPLICIT NONE
 PRIVATE
-PUBLIC :: DP, SP, PI, get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler
+PUBLIC :: PATH_MAX, DP, SP, PI, get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler
 INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.

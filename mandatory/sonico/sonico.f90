@@ -4,6 +4,7 @@ USE sonico_module, ONLY : velocity_t
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=10), PARAMETER :: filename_config = 'config.nml'
+REAL(KIND=WK), PARAMETER :: NaN = 99.99_WK
 CHARACTER(LEN=PATH_MAX) :: filename_input, filename_output
 NAMELIST /namelist_config/ filename_input, filename_output
 CHARACTER(LEN=512) :: h1, h2_1, h2_2, h2_3, h3, h4
@@ -17,10 +18,8 @@ REAL(KIND=WK) :: original(3), rotated(3)
 OPEN(UNIT=30, FILE=filename_config, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
 IF (iostat_config /= 0) THEN
     WRITE(*, 100) filename_config
-    !CALL get_filename(filename_input, 'input', 'WRITE')
-    filename_input = 'sonico.dat' ! MC debug, to speed up testing.
-    !CALL get_filename(filename_output, 'output', 'WRITE')
-    filename_output = 'output.dat' ! MC debug, to speed up testing.
+    CALL get_filename(filename_input, 'input', 'READ')
+    CALL get_filename(filename_output, 'output', 'WRITE')
 ELSE
     READ(30, NML=namelist_config)
 END IF
@@ -85,7 +84,11 @@ ELSE
             original(1) = air(i_data)%u
             original(2) = air(i_data)%v
             original(3) = air(i_data)%w
-            CALL rotate_euler(original, phi, theta, psi, rotated)
+            IF (original(1) >= NaN .OR. original(2) >= NaN .OR. original(3) >= NaN) THEN
+                rotated = NaN
+            ELSE
+                CALL rotate_euler(original, phi, theta, psi, rotated)
+            END IF
             air(i_data)%u = rotated(1)
             air(i_data)%v = rotated(2)
             air(i_data)%w = rotated(3)

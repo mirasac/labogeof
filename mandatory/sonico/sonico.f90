@@ -12,7 +12,7 @@ TYPE(velocity_t), ALLOCATABLE :: air(:)
 REAL(KIND=WK), ALLOCATABLE :: c(:)
 INTEGER, ALLOCATABLE :: analog(:, :)
 REAL(KIND=WK) :: phi, theta, psi
-REAL(KIND=WK) :: v(3)
+REAL(KIND=WK) :: original(3), rotated(3)
 ! Read configurations.
 OPEN(UNIT=30, FILE=filename_config, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
 IF (iostat_config /= 0) THEN
@@ -51,14 +51,26 @@ ELSE
         WRITE(*, 101) 'analog values'
     ELSE
         ! Get rotation angles.
-        WRITE(*, *) 'Insert phi: '
-        READ(*, *) phi
+        DO
+            WRITE(*, *) 'Insert phi: '
+            READ(*, *) phi
+            IF (phi >= 0.0_WK .AND. phi <= 360.0_WK) EXIT
+            WRITE(*, *) 'Error: angle phi should be in interval [0°, 360°]'
+        END DO
         phi = dd2rad(phi)
-        WRITE(*, *) 'Insert theta: '
-        READ(*, *) theta
+        DO
+            WRITE(*, *) 'Insert theta: '
+            READ(*, *) theta
+            IF (theta >= 0.0_WK .AND. theta <= 90.0_WK) EXIT
+            WRITE(*, *) 'Error: angle theta should be in interval [0°, 90°]'
+        END DO
         theta = dd2rad(theta)
-        WRITE(*, *) 'Insert psi: '
-        READ(*, *) psi
+        DO
+            WRITE(*, *) 'Insert psi: '
+            READ(*, *) psi
+            IF (psi >= 0.0_WK .AND. psi <= 360.0_WK) EXIT
+            WRITE(*, *) 'Error: angle psi should be in interval [0°, 360°]'
+        END DO
         psi = dd2rad(psi)
         ! Write header lines in output file.
         WRITE(31, '(A)') TRIM(h1)
@@ -70,13 +82,13 @@ ELSE
             READ(30, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &
                 (analog(i_data, i_analog), i_analog = 1, n_analog, 1)
             ! Apply SDR rotation.
-            v(1) = air(i_data)%u
-            v(2) = air(i_data)%v
-            v(3) = air(i_data)%w
-            CALL rotate_euler(v, phi, theta, psi, v)
-            air(i_data)%u = v(1)
-            air(i_data)%v = v(2)
-            air(i_data)%w = v(3)
+            original(1) = air(i_data)%u
+            original(2) = air(i_data)%v
+            original(3) = air(i_data)%w
+            CALL rotate_euler(original, phi, theta, psi, rotated)
+            air(i_data)%u = rotated(1)
+            air(i_data)%v = rotated(2)
+            air(i_data)%w = rotated(3)
             ! Write data in output file.
             WRITE(31, *) air(i_data)%u, air(i_data)%v, air(i_data)%w, c(i_data), &
                 (analog(i_data, i_analog), i_analog = 1, n_analog, 1)

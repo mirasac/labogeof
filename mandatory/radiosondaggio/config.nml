@@ -1,0 +1,7 @@
+&NAMELIST_CONFIG
+ FILENAME_A_INPUT="A-pT.dat",
+ FILENAME_B_INPUT="B-pT.dat",
+ FILENAME_A_OUTPUT="A-zpT.dat",
+ FILENAME_B_OUTPUT="B-zpT.dat",
+ FILENAME_OUTPUT="output.dat",
+ /

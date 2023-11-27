@@ -3,8 +3,8 @@ USE utilities, ONLY : PATH_MAX, WK => SP, get_filename, count_lines, dd2rad, rot
 USE sonico_module, ONLY : velocity_t
 IMPLICIT NONE
 ! Declare variables.
-CHARACTER(LEN=10), PARAMETER :: filename_config = 'config.nml'
-REAL(KIND=WK), PARAMETER :: NaN = 99.99_WK
+CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
+REAL(KIND=WK), PARAMETER :: NAN = 99.99_WK
 CHARACTER(LEN=PATH_MAX) :: filename_input, filename_output
 NAMELIST /namelist_config/ filename_input, filename_output
 CHARACTER(LEN=512) :: h1, h2_1, h2_2, h2_3, h3, h4
@@ -15,9 +15,9 @@ INTEGER, ALLOCATABLE :: analog(:, :)
 REAL(KIND=WK) :: phi, theta, psi
 REAL(KIND=WK) :: original(3), rotated(3)
 ! Read configurations.
-OPEN(UNIT=30, FILE=filename_config, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
+OPEN(UNIT=30, FILE=FILENAME_CONFIG, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
 IF (iostat_config /= 0) THEN
-    WRITE(*, 100) filename_config
+    WRITE(*, 100) FILENAME_CONFIG
     CALL get_filename(filename_input, 'input', 'READ')
     CALL get_filename(filename_output, 'output', 'WRITE')
 ELSE
@@ -84,8 +84,8 @@ ELSE
             original(1) = air(i_data)%u
             original(2) = air(i_data)%v
             original(3) = air(i_data)%w
-            IF (original(1) >= NaN .OR. original(2) >= NaN .OR. original(3) >= NaN) THEN
-                rotated = NaN
+            IF (original(1) >= NAN .OR. original(2) >= NAN .OR. original(3) >= NAN) THEN
+                rotated = NAN
             ELSE
                 CALL rotate_euler(original, phi, theta, psi, rotated)
             END IF

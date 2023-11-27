@@ -3,7 +3,7 @@ IMPLICIT NONE
 PRIVATE
 PUBLIC :: PATH_MAX, DP, SP, PI, EPS
 PUBLIC :: get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler
-INTEGER, PARAMETER :: PATH_MAX = 4096  ! Maximum number of bytes in absolute paths.
+INTEGER, PARAMETER :: PATH_MAX = 259  ! Maximum number of characters in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.

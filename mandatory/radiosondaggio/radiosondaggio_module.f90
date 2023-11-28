@@ -41,18 +41,30 @@ SUBROUTINE add_altitude(unit_input, unit_output)
     INTEGER, INTENT(IN) :: unit_output
     ! Variables declaration.
     CHARACTER(LEN=512) :: header
-    REAL(KIND=WK) :: h0  ! m
-    REAL(KIND=WK) :: p0  ! mbar
-    REAL(KIND=WK) :: T0  ! °C
+    REAL(KIND=WK) :: h0, z_1, z_2  ! m
+    REAL(KIND=WK) :: p0, p_1, p_2  ! mbar
+    REAL(KIND=WK) :: T0, T_1, T_2  ! °C
+    INTEGER :: iostat_input
     ! Read and write header.
     READ(unit_input, '(A)') header
-    WRITE(unit_output, '(A)') header
+    WRITE(unit_output, '(A)') TRIM(header)
     ! Extract data from header.
     h0 = character2real(header, sub_start='h0=', sub_end='p0=')
     p0 = character2real(header, sub_start='p0=', sub_end='T0=')
     T0 = character2real(header, sub_start='T0=')
-    WRITE(*, *) h0, p0, T0 ! MC debug.
-    ! MC continue.
+    ! Write output.
+    p_1 = p0
+    T_1 = T0
+    z_1 = h0
+    DO
+        READ(unit_input, *, IOSTAT=iostat_input) p_2, T_2
+        IF (iostat_input < 0) EXIT
+        z_2 = get_altitude((T_1 + T_2) / 2.0_WK, p_1, p_2, z_1)
+        p_1 = p_2
+        T_1 = T_2
+        z_1 = z_2
+        WRITE(unit_output, *) p_2, T_2, z_2
+    END DO
 END SUBROUTINE
 
 END MODULE radiosondaggio_module

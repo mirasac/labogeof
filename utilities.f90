@@ -2,7 +2,7 @@ MODULE utilities
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: PATH_MAX, DP, SP, PI, EPS
-PUBLIC :: get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler
+PUBLIC :: get_filename, mat_load, mat_write, count_lines, dd2rad, rotate_euler, character2real
 INTEGER, PARAMETER :: PATH_MAX = 259  ! Maximum number of characters in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
@@ -189,5 +189,40 @@ SUBROUTINE rotate_euler(original, phi, theta, psi, rotated)
     matrix(3, 3) = COS(theta)
     rotated = MATMUL(matrix, original)
 END SUBROUTINE
+
+! Convert real number from character representation to numeric value.
+! IN arguments:
+!   str
+!     Character, input string containing the character representation of
+!     the number to convert.
+! IN optional arguments:
+!   sub_start
+!     Character, substring of the input string starting from which the
+!     number is written, default the conversion start from the beggining
+!     of the input string.
+!   sub_end
+!     Character, substring of the input string which follows the number
+!     to convert in the input string, default the conversion ends at the
+!     end of the input string.
+REAL(KIND=WK) FUNCTION character2real(str, sub_start, sub_end)
+    ! Dummy arguments declaration.
+    CHARACTER(LEN=*), INTENT(IN) :: str
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: sub_start
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: sub_end
+    ! Variables declaration.
+    INTEGER :: i_start, i_end
+    ! Set default values.
+    IF (PRESENT(sub_start)) THEN
+        i_start = INDEX(str, sub_start) + LEN(sub_start)
+    ELSE
+        i_start = 1
+    END IF
+    IF (PRESENT(sub_end)) THEN
+        i_end = INDEX(str, sub_end) - 1
+    ELSE
+        i_end = LEN(str)
+    END IF
+    READ(str(i_start : i_end), *) character2real
+END FUNCTION
 
 END MODULE utilities

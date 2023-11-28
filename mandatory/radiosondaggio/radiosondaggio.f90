@@ -7,7 +7,7 @@ CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
 INTEGER, PARAMETER :: UNIT_A_INPUT = 31
 INTEGER, PARAMETER :: UNIT_A_OUTPUT = 32
 CHARACTER(LEN=PATH_MAX) :: filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
-NAMELIST /namelist_config/ filename_A, filename_B, filename_A_output, filename_B_output, filename_output
+NAMELIST /namelist_config/ filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
 INTEGER :: iostat_config, iostat_A_input, iostat_B_input, iostat_A_output, iostat_B_output, iostat_output
 ! Read configurations.
 OPEN(UNIT=UNIT_A_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_config, ACTION='READ', STATUS='OLD')
@@ -30,7 +30,7 @@ IF (iostat_A_input /= 0) THEN
 ELSE IF (iostat_A_output /= 0) THEN
     WRITE(*, 100) filename_A_output
 ELSE
-    add_altitude(UNIT_A_INPUT, UNIT_A_OUTPUT)
+    CALL add_altitude(UNIT_A_INPUT, UNIT_A_OUTPUT)
 END IF
 CLOSE(UNIT_A_INPUT)
 CLOSE(UNIT_A_OUTPUT)

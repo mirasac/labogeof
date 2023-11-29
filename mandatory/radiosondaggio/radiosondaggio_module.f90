@@ -75,31 +75,29 @@ END FUNCTION
 !     Scalar integer.
 !   unit_output
 !     Scalar integer.
-! IN optional arguments:
-!   z_res
-!     Scalar real, resolution of vertical grid in m, default no analyses
-!     are created.
 ! OUT optional arguments:
-!   p_grid
-!     Real rank 1 array, analyses of pressure data are stored in this
-!     array using vertical grid resolution given by z_res, its size must
-!     be equal or greater than the number of input pressure data,
-!     default is no array is created.
-!   z_grid
-!     Real rank 1 array, grid altitude values corresponding to pressure
-!     analyses are stored in this array, its size must be equal or
-!     greater than the number of input pressure data, default is no
-!     array is created.
-SUBROUTINE add_altitude(unit_input, unit_output, z_res, p_grid, z_grid)
+!   p
+!     Real rank 1 array, input pressure data are stored in this array,
+!     its size must be equal or greater than the number of input
+!     pressure data, by default no array is created.
+!   T
+!     Real rank 1 array, input temperature data are stored in this
+!     array, its size must be equal or greater than the number of input
+!     pressure data, by default no array is created.
+!   z
+!     Real rank 1 array, altitude values are stored in this array, its
+!     size must be equal or greater than the number of input pressure
+!     data, by default no array is created.
+SUBROUTINE add_altitude(unit_input, unit_output, p, T, z)
     ! Dummy arguments declaration.
     INTEGER, INTENT(IN) :: unit_input
     INTEGER, INTENT(IN) :: unit_output
-    REAL(KIND=WK), INTENT(IN), OPTIONAL :: z_res  ! m
-    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p_grid(:)  ! mbar
-    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z_grid(:)  ! m
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p(:)  ! mbar
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: T(:)  ! °C
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z(:)  ! m
     ! Variables declaration.
     CHARACTER(LEN=512) :: header
-    REAL(KIND=WK) :: h0, z_1, z_2, z_0  ! m
+    REAL(KIND=WK) :: h0, z_1, z_2  ! m
     REAL(KIND=WK) :: p0, p_1, p_2  ! mbar
     REAL(KIND=WK) :: T0, T_1, T_2  ! °C
     INTEGER :: iostat_input, i
@@ -114,28 +112,21 @@ SUBROUTINE add_altitude(unit_input, unit_output, z_res, p_grid, z_grid)
     p_1 = p0
     T_1 = T0
     z_1 = h0
-    IF (PRESENT(z_res)) THEN
-        z_0 = (INT(h0 / z_res) + 1) * z_res
-    END IF
     i = 1
     DO
         READ(unit_input, *, IOSTAT=iostat_input) p_2, T_2
         IF (iostat_input < 0) EXIT
-        ! First task.
         z_2 = get_altitude((T_1 + T_2) / 2.0_WK, p_1, p_2, z_1)
         WRITE(unit_output, *) p_2, T_2, z_2
-        ! Second task.
-        IF (PRESENT(z_res)) THEN
-            IF (PRESENT(p_grid)) THEN
-                ! MC continue with evaluation of intermediate layers.
-                p_grid(i) = p_2
-            END IF
-            IF (PRESENT(z_grid)) THEN
-                ! MC continue with evaluation of intermediate layers.
-                z_grid(i) = z_2
-            END IF
+        IF (PRESENT(p)) THEN
+            p(i) = p_2
         END IF
-        ! Update previous data.
+        IF (PRESENT(T)) THEN
+            T(i) = T_2
+        END IF
+        IF (PRESENT(z)) THEN
+            z(i) = z_2
+        END IF
         p_1 = p_2
         T_1 = T_2
         z_1 = z_2

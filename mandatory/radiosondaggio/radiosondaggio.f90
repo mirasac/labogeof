@@ -4,11 +4,15 @@ USE radiosondaggio_module, ONLY : add_altitude
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
+REAL(KIND=WK), PARAMETER :: z_res = 200.0_WK  ! m
 INTEGER, PARAMETER :: UNIT_INPUT = 30
 INTEGER, PARAMETER :: UNIT_OUTPUT = 31
 CHARACTER(LEN=PATH_MAX) :: filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
 NAMELIST /namelist_config/ filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
-INTEGER :: iostat_input, iostat_output
+INTEGER :: iostat_input, iostat_output, n_lines, stat_p, stat_T, stat_z, n_layers
+REAL(KIND=WK), ALLOCATABLE, DIMENSION(:) :: p, p_A, p_B  ! mbar
+REAL(KIND=WK), ALLOCATABLE :: T(:)  ! °C
+REAL(KIND=WK), ALLOCATABLE :: z(:)  ! m
 ! Read configurations.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input /= 0) THEN
@@ -30,7 +34,32 @@ IF (iostat_input /= 0) THEN
 ELSE IF (iostat_output /= 0) THEN
     WRITE(*, 100) filename_A_output
 ELSE
-    CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT)
+    n_lines = count_lines(UNIT_INPUT, skip=1)
+    ALLOCATE(p(n_lines), STAT=stat_p)
+    ALLOCATE(T(n_lines), STAT=stat_T)
+    ALLOCATE(z(n_lines), STAT=stat_z)
+    IF (stat_p > 0) THEN
+        WRITE(*, 101) 'station A pressure'
+    ELSE IF (stat_T > 0) THEN
+        WRITE(*, 101) 'station A temperature'
+    ELSE IF (stat_z > 0) THEN
+        WRITE(*, 101) 'station A altitude'
+    ELSE
+        ! Add altitude values.
+        CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, p=p, T=T, z=z)
+        ! Create pressure analyses.
+        n_layers = INT((z(n_lines) - z(1)) / z_res) + 1
+        ! MC continue.
+    END IF
+    IF (ALLOCATED(p)) THEN
+        DEALLOCATE(p)
+    END IF
+    IF (ALLOCATED(T)) THEN
+        DEALLOCATE(T)
+    END IF
+    IF (ALLOCATED(z)) THEN
+        DEALLOCATE(z)
+    END IF
 END IF
 CLOSE(UNIT_INPUT)
 CLOSE(UNIT_OUTPUT)

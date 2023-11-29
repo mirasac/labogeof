@@ -1,6 +1,6 @@
 PROGRAM radiosondaggio
 USE utilities, ONLY : PATH_MAX, WK => SP, get_filename, count_lines
-USE radiosondaggio_module, ONLY : get_altitude, get_pressure, add_altitude
+USE radiosondaggio_module, ONLY : add_altitude
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
@@ -46,7 +46,8 @@ ELSE
 END IF
 CLOSE(UNIT_INPUT)
 CLOSE(UNIT_OUTPUT)
-! MC continue.
+! Evaluate pressure differences.
+! MC continue, only if previous operations are successful.
 STOP
 100 FORMAT('Error opening file ', A)
 101 FORMAT('Error allocating memory for ', A)

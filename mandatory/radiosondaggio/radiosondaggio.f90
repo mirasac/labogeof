@@ -9,10 +9,10 @@ INTEGER, PARAMETER :: UNIT_INPUT = 30
 INTEGER, PARAMETER :: UNIT_OUTPUT = 31
 CHARACTER(LEN=PATH_MAX) :: filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
 NAMELIST /namelist_config/ filename_A_input, filename_B_input, filename_A_output, filename_B_output, filename_output
-INTEGER :: iostat_input, iostat_output, n_lines, stat_p, stat_T, stat_z, n_layers
+INTEGER :: iostat_input, iostat_output, n_lines, stat_p, stat_T, stat_z, stat_z_grid, n_layers
 REAL(KIND=WK), ALLOCATABLE, DIMENSION(:) :: p, p_A, p_B  ! mbar
 REAL(KIND=WK), ALLOCATABLE :: T(:)  ! °C
-REAL(KIND=WK), ALLOCATABLE :: z(:)  ! m
+REAL(KIND=WK), ALLOCATABLE :: z(:), z_grid(:)  ! m
 ! Read configurations.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input /= 0) THEN
@@ -38,17 +38,24 @@ ELSE
     ALLOCATE(p(n_lines), STAT=stat_p)
     ALLOCATE(T(n_lines), STAT=stat_T)
     ALLOCATE(z(n_lines), STAT=stat_z)
+    ALLOCATE(z_grid(n_lines), STAT=stat_z_grid)
     IF (stat_p > 0) THEN
         WRITE(*, 101) 'station A pressure'
     ELSE IF (stat_T > 0) THEN
         WRITE(*, 101) 'station A temperature'
     ELSE IF (stat_z > 0) THEN
         WRITE(*, 101) 'station A altitude'
+    ELSE IF (stat_z_grid > 0) THEN
+        WRITE(*, 101) 'station A vertical grid'
     ELSE
         ! Add altitude values.
         CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, p=p, T=T, z=z)
         ! Create pressure analyses.
+        z_grid(1) = (INT(z(1) / z_res) + 1) * z_res
+        z_grid(n_lines) = INT(z(n_lines) / z_res) * z_res
         n_layers = INT((z(n_lines) - z(1)) / z_res) + 1
+        WRITE(*, *) z(1), z_grid(1), z(n_lines), z_grid(n_lines) ! MC debug.
+        WRITE(*, *) INT((z_grid(n_lines) - z_grid(1)) / z_res) + 1, n_layers ! MC debug.
         ! MC continue.
     END IF
     IF (ALLOCATED(p)) THEN
@@ -59,6 +66,9 @@ ELSE
     END IF
     IF (ALLOCATED(z)) THEN
         DEALLOCATE(z)
+    END IF
+    IF (ALLOCATED(z_grid)) THEN
+        DEALLOCATE(z_grid)
     END IF
 END IF
 CLOSE(UNIT_INPUT)

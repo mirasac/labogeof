@@ -1,6 +1,6 @@
 PROGRAM radiosondaggio
 USE utilities, ONLY : PATH_MAX, WK => SP, get_filename, count_lines
-USE radiosondaggio_module, ONLY : add_altitude
+USE radiosondaggio_module, ONLY : add_altitude, get_pressure
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
@@ -60,16 +60,16 @@ ELSE
         ELSE
             i_layer = 1
             DO i_line = 2, n_lines, 1
-                WRITE(*, *) '---', z(i_line - 1), '---', i_line - 1 ! MC debug.
+                WRITE(*, *) '---', z(i_line - 1), '---', p(i_line - 1), '---', i_line - 1 ! MC debug.
                 T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
                 i_tmp = 1
                 z_0 = (INT(z(i_line - 1) / z_res)) * z_res
                 DO
                     z_layer = z_0 + i_tmp * z_res
                     IF (z_layer >= z(i_line)) EXIT
-                    WRITE(*, *) '   ', z_layer, '   ', i_layer ! MC debug.
                     z_A(i_layer) = z_layer
-                    p_A(i_layer) = p(i_line) ! MC evaluate pressure.
+                    p_A(i_layer) = get_pressure(T_layer, z(i_line - 1), z_A(i_layer), p(i_line - 1))
+                    WRITE(*, *) '   ', z_A(i_layer), '   ', p_A(i_layer), '   ', i_layer ! MC debug.
                     i_tmp = i_tmp + 1
                     i_layer = i_layer + 1
                 END DO

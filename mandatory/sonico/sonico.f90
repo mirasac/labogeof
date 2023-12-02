@@ -7,6 +7,7 @@ CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
 REAL(KIND=WK), PARAMETER :: NAN = 99.99_WK
 CHARACTER(LEN=PATH_MAX) :: filename_input, filename_output
 NAMELIST /namelist_config/ filename_input, filename_output
+LOGICAL :: exist_output
 CHARACTER(LEN=512) :: h1, h2_1, h2_2, h2_3, h3, h4
 INTEGER :: iostat_config, iostat_input, iostat_output, n_data, n_analog, stat_air, stat_c, stat_analog, i_data, i_analog
 TYPE(velocity_t), ALLOCATABLE :: air(:)
@@ -19,9 +20,11 @@ OPEN(UNIT=30, FILE=FILENAME_CONFIG, IOSTAT=iostat_config, ACTION='READ', STATUS=
 IF (iostat_config /= 0) THEN
     WRITE(*, 100) FILENAME_CONFIG
     CALL get_filename(filename_input, 'input', 'READ')
-    CALL get_filename(filename_output, 'output', 'WRITE')
+    CALL get_filename(filename_output, 'output, note it is replaced if already existing a file wiht same name', 'WRITE')
 ELSE
     READ(30, NML=namelist_config)
+    INQUIRE(FILE=filename_output, EXIST=exist_output)
+    WRITE(*, '(3A)') 'Warning: file ', TRIM(filename_output), ' is already present, it gets overwritten'
 END IF
 CLOSE(30)
 ! Open input and output files.
@@ -85,7 +88,7 @@ ELSE
             original(2) = air(i_data)%v
             original(3) = air(i_data)%w
             IF (original(1) >= NAN .OR. original(2) >= NAN .OR. original(3) >= NAN) THEN
-                rotated = NAN
+                rotated = 0.0_WK
             ELSE
                 CALL rotate_euler(original, phi, theta, psi, rotated)
             END IF

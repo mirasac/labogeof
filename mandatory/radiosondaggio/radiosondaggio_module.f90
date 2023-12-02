@@ -3,7 +3,7 @@ USE utilities, ONLY : WK => SP, character2real
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: R, g, zero_celsius
-PUBLIC :: get_altitude, get_pressure, get_temperature, add_altitude
+PUBLIC :: get_altitude, get_pressure, get_temperature, add_altitude, get_analyses
 REAL(KIND=WK), PARAMETER :: R = 287.0_WK  ! J / (Kg K)
 REAL(KIND=WK), PARAMETER :: g = 9.81_WK  ! m / s^2
 REAL(KIND=WK), PARAMETER :: zero_celsius = 273.15  ! K
@@ -131,6 +131,53 @@ SUBROUTINE add_altitude(unit_input, unit_output, p, T, z)
         T_1 = T_2
         z_1 = z_2
         i = i + 1
+    END DO
+END SUBROUTINE
+
+! Evaluate analyses of pressure on vertical grid with specified resolution.
+! IN arguments:
+!   p
+!     Real rank 1 array, pressure data in mbar.
+!   T
+!     Real rank 1 array, temperature data in °C.
+!   z
+!     Real rank 1 array, altitude data in m.
+!   z_res
+!     Scalar real, resolution of grid in m.
+! OUT arguments:
+!   z_grid
+!     Real rank 1 array, grid altitude data in m.
+!   p_grid
+!     Real rank 1 array, grid pressure data in mbar.
+SUBROUTINE get_analyses(p, T, z, z_res, z_grid, p_grid)
+    ! Dummy arguments declaration.
+    REAL(KIND=WK), INTENT(IN) :: p(:)  ! mbar
+    REAL(KIND=WK), INTENT(IN) :: T(:)  ! °C
+    REAL(KIND=WK), INTENT(IN) :: z(:)  ! m
+    REAL(KIND=WK), INTENT(IN) :: z_res  ! m
+    REAL(KIND=WK), INTENT(OUT) :: z_grid(:)  ! m
+    REAL(KIND=WK), INTENT(OUT) :: p_grid(:)  ! mbar
+    ! Variables declaration.
+    REAL(KIND=WK) :: z_0, z_layer  ! m
+    REAL(KIND=WK) :: T_layer  ! °C
+    INTEGER :: n_lines, i_layer, i_line, i_tmp
+    ! Evaluate analyses from measures.
+    n_lines = SIZE(p)
+    i_layer = 1
+    DO i_line = 2, n_lines, 1
+        WRITE(*, *) '---', z(i_line - 1), '---', p(i_line - 1), '---', i_line - 1 ! MC debug.
+        T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
+        i_tmp = 1
+        z_0 = (INT(z(i_line - 1) / z_res)) * z_res
+        DO
+            z_layer = z_0 + i_tmp * z_res
+            IF (z_layer >= z(i_line)) EXIT
+            z_grid(i_layer) = z_layer
+            p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
+            WRITE(*, *) '   ', z_grid(i_layer), '   ', p_grid(i_layer), '   ', i_layer ! MC debug.
+            i_tmp = i_tmp + 1
+            i_layer = i_layer + 1
+        END DO
     END DO
 END SUBROUTINE
 

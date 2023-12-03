@@ -3,7 +3,7 @@ USE utilities, ONLY : WK => SP, character2real
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: R, g, zero_celsius
-PUBLIC :: get_altitude, get_pressure, get_temperature, add_altitude
+PUBLIC :: get_altitude, get_pressure, get_temperature, add_altitude, get_analyses
 REAL(KIND=WK), PARAMETER :: R = 287.0_WK  ! J / (Kg K)
 REAL(KIND=WK), PARAMETER :: g = 9.81_WK  ! m / s^2
 REAL(KIND=WK), PARAMETER :: zero_celsius = 273.15  ! K
@@ -75,31 +75,29 @@ END FUNCTION
 !     Scalar integer.
 !   unit_output
 !     Scalar integer.
-! IN optional arguments:
-!   z_res
-!     Scalar real, resolution of vertical grid in m, default no analyses
-!     are created.
 ! OUT optional arguments:
-!   p_grid
-!     Real rank 1 array, analyses of pressure data are stored in this
-!     array using vertical grid resolution given by z_res, its size must
-!     be equal or greater than the number of input pressure data,
-!     default is no array is created.
-!   z_grid
-!     Real rank 1 array, grid altitude values corresponding to pressure
-!     analyses are stored in this array, its size must be equal or
-!     greater than the number of input pressure data, default is no
-!     array is created.
-SUBROUTINE add_altitude(unit_input, unit_output, z_res, p_grid, z_grid)
+!   p
+!     Real rank 1 array, input pressure data are stored in this array,
+!     its size must be equal or greater than the number of input
+!     pressure data, by default no array is created.
+!   T
+!     Real rank 1 array, input temperature data are stored in this
+!     array, its size must be equal or greater than the number of input
+!     pressure data, by default no array is created.
+!   z
+!     Real rank 1 array, altitude values are stored in this array, its
+!     size must be equal or greater than the number of input pressure
+!     data, by default no array is created.
+SUBROUTINE add_altitude(unit_input, unit_output, p, T, z)
     ! Dummy arguments declaration.
     INTEGER, INTENT(IN) :: unit_input
     INTEGER, INTENT(IN) :: unit_output
-    REAL(KIND=WK), INTENT(IN), OPTIONAL :: z_res  ! m
-    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p_grid(:)  ! mbar
-    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z_grid(:)  ! m
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p(:)  ! mbar
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: T(:)  ! °C
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z(:)  ! m
     ! Variables declaration.
     CHARACTER(LEN=512) :: header
-    REAL(KIND=WK) :: h0, z_1, z_2, z_0  ! m
+    REAL(KIND=WK) :: h0, z_1, z_2  ! m
     REAL(KIND=WK) :: p0, p_1, p_2  ! mbar
     REAL(KIND=WK) :: T0, T_1, T_2  ! °C
     INTEGER :: iostat_input, i
@@ -114,32 +112,70 @@ SUBROUTINE add_altitude(unit_input, unit_output, z_res, p_grid, z_grid)
     p_1 = p0
     T_1 = T0
     z_1 = h0
-    IF (PRESENT(z_res)) THEN
-        z_0 = (INT(h0 / z_res) + 1) * z_res
-    END IF
     i = 1
     DO
         READ(unit_input, *, IOSTAT=iostat_input) p_2, T_2
         IF (iostat_input < 0) EXIT
-        ! First task.
         z_2 = get_altitude((T_1 + T_2) / 2.0_WK, p_1, p_2, z_1)
         WRITE(unit_output, *) p_2, T_2, z_2
-        ! Second task.
-        IF (PRESENT(z_res)) THEN
-            IF (PRESENT(p_grid)) THEN
-                ! MC continue with evaluation of intermediate layers.
-                p_grid(i) = p_2
-            END IF
-            IF (PRESENT(z_grid)) THEN
-                ! MC continue with evaluation of intermediate layers.
-                z_grid(i) = z_2
-            END IF
+        IF (PRESENT(p)) THEN
+            p(i) = p_2
         END IF
-        ! Update previous data.
+        IF (PRESENT(T)) THEN
+            T(i) = T_2
+        END IF
+        IF (PRESENT(z)) THEN
+            z(i) = z_2
+        END IF
         p_1 = p_2
         T_1 = T_2
         z_1 = z_2
         i = i + 1
+    END DO
+END SUBROUTINE
+
+! Evaluate analyses of pressure on vertical grid with specified resolution.
+! IN arguments:
+!   p
+!     Real rank 1 array, pressure data in mbar.
+!   T
+!     Real rank 1 array, temperature data in °C.
+!   z
+!     Real rank 1 array, altitude data in m.
+!   z_res
+!     Scalar real, resolution of grid in m.
+! OUT arguments:
+!   z_grid
+!     Real rank 1 array, grid altitude data in m.
+!   p_grid
+!     Real rank 1 array, grid pressure data in mbar.
+SUBROUTINE get_analyses(p, T, z, z_res, z_grid, p_grid)
+    ! Dummy arguments declaration.
+    REAL(KIND=WK), INTENT(IN) :: p(:)  ! mbar
+    REAL(KIND=WK), INTENT(IN) :: T(:)  ! °C
+    REAL(KIND=WK), INTENT(IN) :: z(:)  ! m
+    REAL(KIND=WK), INTENT(IN) :: z_res  ! m
+    REAL(KIND=WK), INTENT(OUT) :: z_grid(:)  ! m
+    REAL(KIND=WK), INTENT(OUT) :: p_grid(:)  ! mbar
+    ! Variables declaration.
+    REAL(KIND=WK) :: z_0, z_layer  ! m
+    REAL(KIND=WK) :: T_layer  ! °C
+    INTEGER :: n_lines, i_layer, i_line, i_tmp
+    ! Evaluate analyses from measures.
+    n_lines = SIZE(p)
+    i_layer = 1
+    DO i_line = 2, n_lines, 1
+        T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
+        i_tmp = 1
+        z_0 = (INT(z(i_line - 1) / z_res)) * z_res
+        DO
+            z_layer = z_0 + i_tmp * z_res
+            IF (z_layer >= z(i_line)) EXIT
+            z_grid(i_layer) = z_layer
+            p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
+            i_tmp = i_tmp + 1
+            i_layer = i_layer + 1
+        END DO
     END DO
 END SUBROUTINE
 

@@ -155,7 +155,6 @@ END IF
 IF (ALLOCATED(delta_p)) THEN
     DEALLOCATE(delta_p)
 END IF
-STOP
 100 FORMAT('Error opening file ', A)
 101 FORMAT('Error allocating memory for ', A)
 END PROGRAM radiosondaggio

@@ -76,6 +76,10 @@ END FUNCTION
 !   unit_output
 !     Scalar integer.
 ! OUT optional arguments:
+!   z
+!     Real rank 1 array, altitude values are stored in this array, its
+!     size must be equal or greater than the number of input pressure
+!     data, by default no array is created.
 !   p
 !     Real rank 1 array, input pressure data are stored in this array,
 !     its size must be equal or greater than the number of input
@@ -84,17 +88,13 @@ END FUNCTION
 !     Real rank 1 array, input temperature data are stored in this
 !     array, its size must be equal or greater than the number of input
 !     pressure data, by default no array is created.
-!   z
-!     Real rank 1 array, altitude values are stored in this array, its
-!     size must be equal or greater than the number of input pressure
-!     data, by default no array is created.
-SUBROUTINE add_altitude(unit_input, unit_output, p, T, z)
+SUBROUTINE add_altitude(unit_input, unit_output, z, p, T)
     ! Dummy arguments declaration.
     INTEGER, INTENT(IN) :: unit_input
     INTEGER, INTENT(IN) :: unit_output
+    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z(:)  ! m
     REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p(:)  ! mbar
     REAL(KIND=WK), INTENT(OUT), OPTIONAL :: T(:)  ! °C
-    REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z(:)  ! m
     ! Variables declaration.
     CHARACTER(LEN=512) :: header
     REAL(KIND=WK) :: h0, z_1, z_2  ! m
@@ -109,39 +109,39 @@ SUBROUTINE add_altitude(unit_input, unit_output, p, T, z)
     p0 = character2real(header, sub_start='p0=', sub_end='T0=')
     T0 = character2real(header, sub_start='T0=')
     ! Write output.
+    z_1 = h0
     p_1 = p0
     T_1 = T0
-    z_1 = h0
     i = 1
     DO
         READ(unit_input, *, IOSTAT=iostat_input) p_2, T_2
         IF (iostat_input < 0) EXIT
         z_2 = get_altitude((T_1 + T_2) / 2.0_WK, p_1, p_2, z_1)
-        WRITE(unit_output, *) p_2, T_2, z_2
+        WRITE(unit_output, *) z_2, p_2, T_2
+        IF (PRESENT(z)) THEN
+            z(i) = z_2
+        END IF
         IF (PRESENT(p)) THEN
             p(i) = p_2
         END IF
         IF (PRESENT(T)) THEN
             T(i) = T_2
         END IF
-        IF (PRESENT(z)) THEN
-            z(i) = z_2
-        END IF
+        z_1 = z_2
         p_1 = p_2
         T_1 = T_2
-        z_1 = z_2
         i = i + 1
     END DO
 END SUBROUTINE
 
 ! Evaluate analyses of pressure on vertical grid with specified resolution.
 ! IN arguments:
+!   z
+!     Real rank 1 array, altitude data in m.
 !   p
 !     Real rank 1 array, pressure data in mbar.
 !   T
 !     Real rank 1 array, temperature data in °C.
-!   z
-!     Real rank 1 array, altitude data in m.
 !   z_res
 !     Scalar real, resolution of grid in m.
 ! OUT arguments:
@@ -149,11 +149,11 @@ END SUBROUTINE
 !     Real rank 1 array, grid altitude data in m.
 !   p_grid
 !     Real rank 1 array, grid pressure data in mbar.
-SUBROUTINE get_analyses(p, T, z, z_res, z_grid, p_grid)
+SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ! Dummy arguments declaration.
+    REAL(KIND=WK), INTENT(IN) :: z(:)  ! m
     REAL(KIND=WK), INTENT(IN) :: p(:)  ! mbar
     REAL(KIND=WK), INTENT(IN) :: T(:)  ! °C
-    REAL(KIND=WK), INTENT(IN) :: z(:)  ! m
     REAL(KIND=WK), INTENT(IN) :: z_res  ! m
     REAL(KIND=WK), INTENT(OUT) :: z_grid(:)  ! m
     REAL(KIND=WK), INTENT(OUT) :: p_grid(:)  ! mbar

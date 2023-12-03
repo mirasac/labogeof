@@ -165,7 +165,6 @@ SUBROUTINE get_analyses(p, T, z, z_res, z_grid, p_grid)
     n_lines = SIZE(p)
     i_layer = 1
     DO i_line = 2, n_lines, 1
-        WRITE(*, *) '---', z(i_line - 1), '---', p(i_line - 1), '---', i_line - 1 ! MC debug.
         T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
         i_tmp = 1
         z_0 = (INT(z(i_line - 1) / z_res)) * z_res
@@ -174,7 +173,6 @@ SUBROUTINE get_analyses(p, T, z, z_res, z_grid, p_grid)
             IF (z_layer >= z(i_line)) EXIT
             z_grid(i_layer) = z_layer
             p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
-            WRITE(*, *) '   ', z_grid(i_layer), '   ', p_grid(i_layer), '   ', i_layer ! MC debug.
             i_tmp = i_tmp + 1
             i_layer = i_layer + 1
         END DO

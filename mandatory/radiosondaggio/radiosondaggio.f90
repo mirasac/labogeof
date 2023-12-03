@@ -73,7 +73,6 @@ ELSE
 END IF
 CLOSE(UNIT_INPUT)
 CLOSE(UNIT_OUTPUT)
-WRITE(*, *) ! MC debug.
 ! Operate on station B data.
 OPEN(UNIT=UNIT_INPUT, FILE=filename_B_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_B_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
@@ -130,12 +129,10 @@ ELSE
     z_min = MAX(z_A(1), z_B(1))
     i_A_min = MINLOC(z_A, 1, ABS(z_A - z_min) <= EPS)
     i_B_min = MINLOC(z_B, 1, ABS(z_B - z_min) <= EPS)
-    WRITE(*, *) z_min, i_A_min, i_B_min ! MC debug.
     ! Find index of maximum common altitude.
     z_max = MIN(z_A(n_A), z_B(n_B))
     i_A_max = MAXLOC(z_A, 1, ABS(z_A - z_max) <= EPS)
     i_B_max = MAXLOC(z_B, 1, ABS(z_B - z_max) <= EPS)
-    WRITE(*, *) z_max, i_A_max, i_B_max ! MC debug.
     ! Write pressure differences.
     delta_p =  p_A(i_A_min : i_A_max) - p_B(i_B_min : i_B_max)
     DO i = 1, SIZE(delta_p), 1

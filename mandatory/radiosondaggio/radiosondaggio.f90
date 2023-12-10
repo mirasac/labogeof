@@ -29,7 +29,6 @@ ELSE
 END IF
 CLOSE(UNIT_INPUT)
 ! Operate on station A data.
-WRITE(*, *) 'Station A' ! MC debug.
 OPEN(UNIT=UNIT_INPUT, FILE=filename_A_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_A_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
 IF (iostat_input /= 0) THEN
@@ -75,7 +74,6 @@ END IF
 CLOSE(UNIT_INPUT)
 CLOSE(UNIT_OUTPUT)
 ! Operate on station B data.
-WRITE(*, *) 'Station B' ! MC debug.
 OPEN(UNIT=UNIT_INPUT, FILE=filename_B_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_B_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
 IF (iostat_input /= 0) THEN

@@ -164,17 +164,14 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
     i_layer = 1
-    WRITE(*, *) '--- z / m --- p / mbar --- T / °C' ! MC debug.
     z_layer_0 = (INT(z(1) / z_res)) * z_res
     DO i_line = 2, n_lines, 1  ! Layers are delimited by non-gridded data.
         T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
-        WRITE(*, *) '---', z(i_line - 1), '---', p(i_line - 1), '---', T(i_line - 1) ! MC debug.
         DO
             z_layer = z_layer_0 + i_layer * z_res
             IF (z_layer >= z(i_line)) EXIT
             z_grid(i_layer) = z_layer
             p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
-            WRITE(*, *) '   ', z_grid(i_layer), '   ', p_grid(i_layer), '   ', T_layer ! MC debug.
             i_layer = i_layer + 1
         END DO
     END DO

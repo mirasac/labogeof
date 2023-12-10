@@ -158,22 +158,23 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     REAL(KIND=WK), INTENT(OUT) :: z_grid(:)  ! m
     REAL(KIND=WK), INTENT(OUT) :: p_grid(:)  ! mbar
     ! Variables declaration.
-    REAL(KIND=WK) :: z_0, z_layer  ! m
+    REAL(KIND=WK) :: z_layer_0, z_layer  ! m
     REAL(KIND=WK) :: T_layer  ! °C
-    INTEGER :: n_lines, i_layer, i_line, i_tmp
+    INTEGER :: n_lines, i_layer, i_line
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
     i_layer = 1
-    DO i_line = 2, n_lines, 1
+    WRITE(*, *) '--- z / m --- p / mbar --- T / °C' ! MC debug.
+    z_layer_0 = (INT(z(1) / z_res)) * z_res
+    DO i_line = 2, n_lines, 1  ! Layers are delimited by non-gridded data.
         T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
-        i_tmp = 1
-        z_0 = (INT(z(i_line - 1) / z_res)) * z_res
+        WRITE(*, *) '---', z(i_line - 1), '---', p(i_line - 1), '---', T(i_line - 1) ! MC debug.
         DO
-            z_layer = z_0 + i_tmp * z_res
+            z_layer = z_layer_0 + i_layer * z_res
             IF (z_layer >= z(i_line)) EXIT
             z_grid(i_layer) = z_layer
             p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
-            i_tmp = i_tmp + 1
+            WRITE(*, *) '   ', z_grid(i_layer), '   ', p_grid(i_layer), '   ', T_layer ! MC debug.
             i_layer = i_layer + 1
         END DO
     END DO

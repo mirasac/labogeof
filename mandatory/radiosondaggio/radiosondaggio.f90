@@ -31,6 +31,8 @@ CLOSE(UNIT_INPUT)
 ! Operate on station A data.
 OPEN(UNIT=UNIT_INPUT, FILE=filename_A_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_A_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
+stat_z_A = -1
+stat_p_A = -1
 IF (iostat_input /= 0) THEN
     WRITE(*, 100) filename_A_input
 ELSE IF (iostat_output /= 0) THEN
@@ -76,6 +78,8 @@ CLOSE(UNIT_OUTPUT)
 ! Operate on station B data.
 OPEN(UNIT=UNIT_INPUT, FILE=filename_B_input, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_B_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
+stat_z_B = -1
+stat_p_B = -1
 IF (iostat_input /= 0) THEN
     WRITE(*, 100) filename_B_input
 ELSE IF (iostat_output /= 0) THEN
@@ -122,7 +126,7 @@ CLOSE(UNIT_OUTPUT)
 OPEN(UNIT=UNIT_OUTPUT, FILE=filename_output, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
 IF (iostat_output /= 0) THEN
     WRITE(*, 100) filename_output
-ELSE IF (stat_z_A > 0 .OR. stat_p_A > 0 .OR. stat_z_B > 0 .OR. stat_p_B > 0) THEN
+ELSE IF (stat_z_A /= 0 .OR. stat_p_A /= 0 .OR. stat_z_B /= 0 .OR. stat_p_B /= 0) THEN
     WRITE(*, *) 'Pressure differences not evaluated'
 ELSE
     ! Find index of minimum common altitude.

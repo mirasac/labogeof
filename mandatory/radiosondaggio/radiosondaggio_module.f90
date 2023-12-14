@@ -164,9 +164,9 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
     IF (n_lines < 2) THEN
-        WRITE(*, '(A)') 'Error: pressure data should be at least 2 measures'
+        WRITE(*, '(A)') 'Error: pressure data should be at least 2 values'
     ELSE IF (SIZE(z) < n_lines .OR. SIZE(T) < n_lines) THEN
-        WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number of pressure data'
+        WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number as pressure data'
     ELSE
         z_layer_0 = (INT(z(1) / z_res)) * z_res
         i_layer = 1

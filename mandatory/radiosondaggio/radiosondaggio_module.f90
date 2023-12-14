@@ -163,18 +163,24 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     INTEGER :: n_lines, i_layer, i_line
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
-    i_layer = 1
-    z_layer_0 = (INT(z(1) / z_res)) * z_res
-    DO i_line = 2, n_lines, 1  ! Layers are delimited by non-gridded data.
-        T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
-        DO
-            z_layer = z_layer_0 + i_layer * z_res
-            IF (z_layer >= z(i_line)) EXIT
-            z_grid(i_layer) = z_layer
-            p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
-            i_layer = i_layer + 1
+    IF (n_lines < 2) THEN
+        WRITE(*, '(A)') 'Error: pressure data should be at least 2 measures'
+    ELSE IF (SIZE(z) < n_lines .OR. SIZE(T) < n_lines) THEN
+        WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number of pressure data'
+    ELSE
+        z_layer_0 = (INT(z(1) / z_res)) * z_res
+        i_layer = 1
+        DO i_line = 2, n_lines, 1  ! Layers are delimited by non-gridded data.
+            T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
+            DO
+                z_layer = z_layer_0 + i_layer * z_res
+                IF (z_layer >= z(i_line)) EXIT
+                z_grid(i_layer) = z_layer
+                p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
+                i_layer = i_layer + 1
+            END DO
         END DO
-    END DO
+    END IF
 END SUBROUTINE
 
 END MODULE radiosondaggio_module

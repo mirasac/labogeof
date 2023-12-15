@@ -193,7 +193,7 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ELSE IF (SIZE(z) < n_lines .OR. SIZE(T) < n_lines) THEN
         WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number as pressure data'
     ELSE
-        z_layer_0 = (INT(z(1) / z_res)) * z_res  ! First input data is excluded if on grid.
+        z_layer_0 = (INT(z(1) / z_res)) * z_res  ! Beware that first input data is excluded even if on grid.
         ! Set first value on grid.
         z_layer = z_layer_0 + z_res
         DO i_line = 2, n_lines, 1

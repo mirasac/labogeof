@@ -75,6 +75,11 @@ END FUNCTION
 !     Scalar integer.
 !   unit_output
 !     Scalar integer.
+! IN optional arguments:
+!   store_zero
+!     Scalar logical, if any array as out argument is specified, the
+!     reference value of input data is stored as first element of that
+!     array. Default .FALSE.
 ! OUT optional arguments:
 !   z
 !     Real rank 1 array, altitude values are stored in this array, its
@@ -88,19 +93,27 @@ END FUNCTION
 !     Real rank 1 array, input temperature data are stored in this
 !     array, its size must be equal or greater than the number of input
 !     pressure data, by default no array is created.
-SUBROUTINE add_altitude(unit_input, unit_output, z, p, T)
+SUBROUTINE add_altitude(unit_input, unit_output, store_zero, z, p, T)
     ! Dummy arguments declaration.
     INTEGER, INTENT(IN) :: unit_input
     INTEGER, INTENT(IN) :: unit_output
+    LOGICAL, INTENT(IN), OPTIONAL :: store_zero
     REAL(KIND=WK), INTENT(OUT), OPTIONAL :: z(:)  ! m
     REAL(KIND=WK), INTENT(OUT), OPTIONAL :: p(:)  ! mbar
     REAL(KIND=WK), INTENT(OUT), OPTIONAL :: T(:)  ! °C
     ! Variables declaration.
+    LOGICAL :: store_zero_
     CHARACTER(LEN=512) :: header
     REAL(KIND=WK) :: h0, z_1, z_2  ! m
     REAL(KIND=WK) :: p0, p_1, p_2  ! mbar
     REAL(KIND=WK) :: T0, T_1, T_2  ! °C
     INTEGER :: iostat_input, i
+    ! Set default values.
+    IF (PRESENT(store_zero)) THEN
+        store_zero_ = store_zero
+    ELSE
+        store_zero_ = .FALSE.
+    END IF
     ! Read and write header.
     READ(unit_input, '(A)') header
     WRITE(unit_output, '(A)') TRIM(header)
@@ -113,6 +126,18 @@ SUBROUTINE add_altitude(unit_input, unit_output, z, p, T)
     p_1 = p0
     T_1 = T0
     i = 1
+    IF (store_zero_) THEN
+        IF (PRESENT(z)) THEN
+            z(i) = h0
+        END IF
+        IF (PRESENT(p)) THEN
+            p(i) = p0
+        END IF
+        IF (PRESENT(T)) THEN
+            T(i) = T0
+        END IF
+        i = 2
+    END IF
     DO
         READ(unit_input, *, IOSTAT=iostat_input) p_2, T_2
         IF (iostat_input < 0) EXIT
@@ -164,9 +189,9 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
     IF (n_lines < 2) THEN
-        WRITE(*, '(A)') 'Error: pressure data should be at least 2 measures'
+        WRITE(*, '(A)') 'Error: pressure data should be at least 2 values'
     ELSE IF (SIZE(z) < n_lines .OR. SIZE(T) < n_lines) THEN
-        WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number of pressure data'
+        WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number as pressure data'
     ELSE
         z_layer_0 = (INT(z(1) / z_res)) * z_res
         T_layer = (T(2) + T(1)) / 2.0_WK

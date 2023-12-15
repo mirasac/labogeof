@@ -38,7 +38,7 @@ IF (iostat_input /= 0) THEN
 ELSE IF (iostat_output /= 0) THEN
     WRITE(*, 100) filename_A_output
 ELSE
-    n_lines = count_lines(UNIT_INPUT, skip=1)
+    n_lines = count_lines(UNIT_INPUT)
     ALLOCATE(z(n_lines), STAT=stat_z)
     ALLOCATE(p(n_lines), STAT=stat_p)
     ALLOCATE(T(n_lines), STAT=stat_T)
@@ -50,9 +50,9 @@ ELSE
         WRITE(*, 101) 'station A temperature'
     ELSE
         ! Add altitude values.
-        CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, z=z, p=p, T=T)
+        CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, store_zero=.TRUE., z=z, p=p, T=T)
         ! Create pressure analyses.
-        n_A = INT((z(n_lines) - z(1)) / z_res) + 1
+        n_A = INT(z(n_lines) / z_res) - INT(z(1) / z_res)
         ALLOCATE(z_A(n_A), STAT=stat_z_A)
         ALLOCATE(p_A(n_A), STAT=stat_p_A)
         IF (stat_z_A > 0) THEN
@@ -85,7 +85,7 @@ IF (iostat_input /= 0) THEN
 ELSE IF (iostat_output /= 0) THEN
     WRITE(*, 100) filename_B_output
 ELSE
-    n_lines = count_lines(UNIT_INPUT, skip=1)
+    n_lines = count_lines(UNIT_INPUT)
     ALLOCATE(z(n_lines), STAT=stat_z)
     ALLOCATE(p(n_lines), STAT=stat_p)
     ALLOCATE(T(n_lines), STAT=stat_T)
@@ -97,9 +97,9 @@ ELSE
         WRITE(*, 101) 'station B temperature'
     ELSE
         ! Add altitude values.
-        CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, z=z, p=p, T=T)
+        CALL add_altitude(UNIT_INPUT, UNIT_OUTPUT, store_zero=.TRUE., z=z, p=p, T=T)
         ! Create pressure analyses.
-        n_B = INT((z(n_lines) - z(1)) / z_res) + 1
+        n_B = INT(z(n_lines) / z_res) - INT(z(1) / z_res)
         ALLOCATE(z_B(n_B), STAT=stat_z_B)
         ALLOCATE(p_B(n_B), STAT=stat_p_B)
         IF (stat_z_B > 0) THEN

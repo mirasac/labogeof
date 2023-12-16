@@ -197,7 +197,7 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
         ! Set first value on grid.
         z_layer = z_layer_0 + z_res
         DO i_line = 2, n_lines, 1
-            IF (z_layer < z(i_line)) EXIT  ! No equality because using mean temperature would be wrong since real data is available.
+            IF (z_layer < z(i_line)) EXIT  ! Using < instead of <= because otherwise a real data point would be available but its values were not used.
         END DO
         IF (i_line > n_lines) THEN
             WRITE(*, '(A)') 'Error: grid resolution is too coarse (value too high) to evaluate analyses from input data'

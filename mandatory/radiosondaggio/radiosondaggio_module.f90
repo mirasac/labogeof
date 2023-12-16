@@ -185,7 +185,7 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ! Variables declaration.
     REAL(KIND=WK) :: z_layer_0, z_layer  ! m
     REAL(KIND=WK) :: T_layer  ! °C
-    INTEGER :: n_lines, i_layer, i_line
+    INTEGER :: n_lines, i_layer, i_line, i_line_start
     ! Evaluate analyses from measures.
     n_lines = SIZE(p)
     IF (n_lines < 2) THEN
@@ -193,18 +193,32 @@ SUBROUTINE get_analyses(z, p, T, z_res, z_grid, p_grid)
     ELSE IF (SIZE(z) < n_lines .OR. SIZE(T) < n_lines) THEN
         WRITE(*, '(A)') 'Error: altitude and temperature data should be at least the same number as pressure data'
     ELSE
-        z_layer_0 = (INT(z(1) / z_res)) * z_res
-        i_layer = 1
-        DO i_line = 2, n_lines, 1  ! Layers are delimited by non-gridded data.
-            T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
-            DO
-                z_layer = z_layer_0 + i_layer * z_res
-                IF (z_layer >= z(i_line)) EXIT
-                z_grid(i_layer) = z_layer
-                p_grid(i_layer) = get_pressure(T_layer, z(i_line - 1), z_grid(i_layer), p(i_line - 1))
-                i_layer = i_layer + 1
-            END DO
+        z_layer_0 = (INT(z(1) / z_res)) * z_res  ! Beware that first input data is excluded even if on grid.
+        ! Set first value on grid.
+        z_layer = z_layer_0 + z_res
+        DO i_line = 2, n_lines, 1
+            IF (z_layer < z(i_line)) EXIT  ! Using < instead of <= because otherwise a real data point would be available but its values were not used.
         END DO
+        IF (i_line > n_lines) THEN
+            WRITE(*, '(A)') 'Error: grid resolution is too coarse (value too high) to evaluate analyses from input data'
+        ELSE
+            T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
+            z_grid(1) = z_layer
+            p_grid(1) = get_pressure(T_layer, z(i_line - 1), z_grid(1), p(i_line - 1))  ! First element of input data are used for first analysis.
+            ! Set remaining values on grid.
+            i_line_start = i_line
+            i_layer = 2
+            DO i_line = i_line_start, n_lines, 1
+                T_layer = (T(i_line) + T(i_line - 1)) / 2.0_WK
+                DO
+                    z_layer = z_layer_0 + i_layer * z_res
+                    IF (z_layer >= z(i_line)) EXIT  ! Also equality to avoid duplication of altitudes at the next loop iteration.
+                    z_grid(i_layer) = z_layer
+                    p_grid(i_layer) = get_pressure(T_layer, z_grid(i_layer - 1), z_grid(i_layer), p_grid(i_layer - 1))
+                    i_layer = i_layer + 1
+                END DO
+            END DO
+        END IF
     END IF
 END SUBROUTINE
 

@@ -33,11 +33,10 @@ The following list acts as index of all lessons and exercises performed during t
 21. 2023-11-15
 22. 2023-11-17 - mandatory exercise `radiosondaggio`
 23. 2023-11-20
-24. 2023-11-29
-25. 2023-12-01
-26. 2023-12-11
-27. 2023-12-13
-28. 2023-12-20
+24. 2023-12-01 - WRF laboratory session
+25. 2023-12-11 - WRF laboratory session
+26. 2023-12-13
+27. 2023-12-20 - WRF laboratory session
 
 ## Environment
 

@@ -7,11 +7,15 @@ INTEGER, PARAMETER :: UNIT_INPUT = 30
 INTEGER, PARAMETER :: UNIT_OUTPUT = 31
 CHARACTER(LEN=PATH_MAX) :: filename_constants, filename_radius, filename_positive_out, filename_negative_out, &
     filename_data, filename_data_out, filename_absolute_out, filename_relative_out
-REAL(KIND=WK) :: T  ! K
+REAL(KIND=WK) :: T, zero_celsius  ! K
+REAL(KIND=WK) :: sigma  ! N m-1
+REAL(KIND=WK) :: V_m  ! m3 mol-1
+REAL(KIND=WK) :: R  ! J mol-1 K-1
 REAL(KIND=WK) :: error_code_NA
+INTEGER :: iostat_input, iostat_output
 NAMELIST /namelist_config/ filename_constants, filename_radius, T, filename_positive_out, filename_negative_out, &
     filename_data, error_code_NA, filename_data_out, filename_absolute_out, filename_relative_out
-INTEGER :: iostat_input, iostat_output
+NAMELIST /namelist_constants/ sigma, V_m, R, zero_celsius
 ! Read configurations.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input /= 0) THEN
@@ -39,6 +43,18 @@ IF (iostat_input /= 0) THEN
     CLOSE(UNIT_OUTPUT)
 ELSE
     READ(UNIT_INPUT, NML=namelist_config)
+    CLOSE(UNIT_INPUT)
+END IF
+! Read physical constant.
+sigma = error_code_NA
+V_m = error_code_NA
+R = error_code_NA
+zero_celsius = error_code_NA
+OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_constants), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
+IF (iostat_input /= 0) THEN
+    WRITE(*, 100) TRIM(filename_constants)
+ELSE
+    READ(UNIT_INPUT, NML=namelist_constants)
 END IF
 CLOSE(UNIT_INPUT)
 100 FORMAT('Error opening file ', A)

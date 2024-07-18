@@ -8,6 +8,7 @@
 # Other
 **.vscode
 **.dat
+!exam/data_outdoor.dat
 20**/*.txt
 **.mod
 mandatory/matrix_filter/*.txt

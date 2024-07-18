@@ -9,7 +9,7 @@ INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.
 INTEGER, PARAMETER :: WK = SP  ! Working kind.
-REAL(KIND=WK), PARAMETER :: EPS = 0.01_WK
+REAL(KIND=WK), PARAMETER :: EPS = TINY(1.0_WK)  ! Machine epsilon.
 TYPE :: date_t
     INTEGER :: year
     INTEGER :: month

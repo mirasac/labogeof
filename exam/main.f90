@@ -1,5 +1,5 @@
 PROGRAM main
-USE utilities, ONLY : PATH_MAX, WK => SP, date_t, time_t, get_filename, count_lines
+USE utilities, ONLY : PATH_MAX, WK => SP, EPS, date_t, time_t, get_filename, count_lines
 USE functions, ONLY : get_vapor_pressure_ratio
 IMPLICIT NONE
 ! Declare variables.
@@ -86,7 +86,7 @@ ELSE
                 WRITE(*, 100) TRIM(filename_positive_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
-                WHERE (ABS(radius - 0.0_WK) .LE. TINY(1.0_WK))
+                WHERE (ABS(radius - 0.0_WK) .LE. EPS)
                     ratio_positive = error_code_NA
                 ELSEWHERE
                     ratio_positive = get_vapor_pressure_ratio(radius, sigma, V_m, R, T)
@@ -108,7 +108,7 @@ ELSE
                 WRITE(*, 100) TRIM(filename_negative_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
-                WHERE (ABS(radius - 0.0_WK) .LE. TINY(1.0_WK))
+                WHERE (ABS(radius - 0.0_WK) .LE. EPS)
                     ratio_negative = error_code_NA
                 ELSEWHERE
                     ratio_negative = get_vapor_pressure_ratio(-radius, sigma, V_m, R, T)

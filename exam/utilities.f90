@@ -2,6 +2,7 @@ MODULE utilities
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: PATH_MAX, DP, SP, EPS
+PUBLIC :: date_t, time_t
 PUBLIC :: get_filename, count_lines
 INTEGER, PARAMETER :: PATH_MAX = 259  ! Maximum number of characters in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
@@ -9,6 +10,16 @@ INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and 
 INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.
 INTEGER, PARAMETER :: WK = SP  ! Working kind.
 REAL(KIND=WK), PARAMETER :: EPS = 0.01_WK
+TYPE :: date_t
+    INTEGER :: year
+    INTEGER :: month
+    INTEGER :: day
+END TYPE
+TYPE :: time_t
+    INTEGER :: hour
+    INTEGER :: minute
+    INTEGER :: second
+END TYPE
 CONTAINS
 
 ! Get filename from standard input and store in specified variable.

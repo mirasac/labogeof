@@ -1,5 +1,5 @@
 PROGRAM main
-USE utilities, ONLY : PATH_MAX, WK => SP, get_filename, count_lines
+USE utilities, ONLY : PATH_MAX, WK => SP, date_t, time_t, get_filename, count_lines
 USE functions, ONLY : get_vapor_pressure_ratio
 IMPLICIT NONE
 ! Declare variables.

@@ -86,7 +86,11 @@ ELSE
                 WRITE(*, 100) TRIM(filename_positive_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
-                ratio_positive = get_vapor_pressure_ratio(radius, sigma, V_m, R, T)
+                WHERE (ABS(radius - 0.0_WK) .LE. TINY(1.0_WK))
+                    ratio_positive = error_code_NA
+                ELSEWHERE
+                    ratio_positive = get_vapor_pressure_ratio(radius, sigma, V_m, R, T)
+                ENDWHERE
                 DO i = 1, size_radius, 1
                     WRITE(UNIT_OUTPUT, 104) radius(i), ratio_positive(i)
                 END DO
@@ -104,7 +108,11 @@ ELSE
                 WRITE(*, 100) TRIM(filename_negative_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
-                ratio_negative = get_vapor_pressure_ratio(-radius, sigma, V_m, R, T)
+                WHERE (ABS(radius - 0.0_WK) .LE. TINY(1.0_WK))
+                    ratio_negative = error_code_NA
+                ELSEWHERE
+                    ratio_negative = get_vapor_pressure_ratio(-radius, sigma, V_m, R, T)
+                ENDWHERE
                 DO i = 1, size_radius, 1
                     WRITE(UNIT_OUTPUT, 104) radius(i), ratio_negative(i)
                 END DO

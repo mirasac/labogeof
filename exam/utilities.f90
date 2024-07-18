@@ -2,7 +2,7 @@ MODULE utilities
 IMPLICIT NONE
 PRIVATE
 PUBLIC :: PATH_MAX, DP, SP, EPS
-PUBLIC :: get_filename
+PUBLIC :: get_filename, count_lines
 INTEGER, PARAMETER :: PATH_MAX = 259  ! Maximum number of characters in absolute paths.
 INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in terminal.
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
@@ -57,5 +57,37 @@ SUBROUTINE get_filename(filename, description, action_file)
         END IF
     END DO
 END SUBROUTINE
+
+! Count lines from the beginning of the file.
+! IN arguments:
+!   unit_file
+!     Scalar integer, unit of file opened with read action.
+! IN optional arguments:
+!   skip
+!     Scalar, integer, number of lines to skip starting from the beginning, default 0.
+INTEGER FUNCTION count_lines(unit_file, skip)
+    ! Dummy arguments declaration.
+    INTEGER, INTENT(IN) :: unit_file
+    INTEGER, INTENT(IN), OPTIONAL :: skip
+    ! Variables declaration.
+    INTEGER :: skip_, iostat_file
+    ! Set default values.
+    IF (PRESENT(skip)) THEN
+        skip_ = skip
+    ELSE
+        skip_ = 0
+    END IF
+    ! Count lines.
+    REWIND(unit_file)
+    count_lines = 0
+    DO
+        READ(unit_file, *, IOSTAT=iostat_file)
+        IF (iostat_file < 0) EXIT
+        count_lines = count_lines + 1
+    END DO
+    REWIND(unit_file)
+    ! Skip lines from the beginning of unit.
+    count_lines = count_lines - skip_
+END FUNCTION
 
 END MODULE utilities

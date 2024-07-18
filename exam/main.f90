@@ -1,5 +1,6 @@
 PROGRAM main
 USE utilities, ONLY : PATH_MAX, WK => SP, get_filename
+USE functions, ONLY : get_vapor_pressure_ratio
 IMPLICIT NONE
 ! Declare variables.
 CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'

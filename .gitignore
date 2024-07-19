@@ -12,6 +12,8 @@
 !exam/vapor_pressure_ratio_positive_radius.dat
 !exam/vapor_pressure_ratio_negative_radius.dat
 !exam/data_outdoor_critical.dat
+!exam/data_outdoor_absolute_count.dat
+!exam/data_outdoor_relative_count.dat
 20**/*.txt
 **.mod
 mandatory/matrix_filter/*.txt

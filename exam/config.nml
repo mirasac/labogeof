@@ -1,6 +1,8 @@
 &NAMELIST_CONFIG
  FILENAME_CONSTANTS="constants.nml",
  FILENAME_RADIUS="elenco_raggio.txt",
+ SIGMA=0.0756,
+ V_M=0.000018,
  T=273.15,
  FILENAME_POSITIVE_OUT="vapor_pressure_ratio_positive_radius.dat",
  FILENAME_NEGATIVE_OUT="vapor_pressure_ratio_negative_radius.dat",
@@ -9,4 +11,10 @@
  FILENAME_DATA_OUT="data_outdoor_critical.dat",
  FILENAME_ABSOLUTE_OUT="data_outdoor_absolute_count.dat",
  FILENAME_RELATIVE_OUT="data_outdoor_relative_count.dat",
+ /
+
+&NAMELIST_UNITS
+ SIGMA_UNITS="N m-1",
+ V_M_UNITS="m3 mol-1",
+ T_UNITS="K",
  /

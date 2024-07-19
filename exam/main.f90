@@ -26,16 +26,20 @@ REAL(KIND=WK), ALLOCATABLE :: batch_RH(:), CRH(:)
 CHARACTER(LEN=1024) :: dummy_field, format_string
 LOGICAL :: print_data_out, print_absolute_out, raised_warning
 INTEGER, ALLOCATABLE :: daily_greater(:, :)
-NAMELIST /namelist_config/ filename_constants, filename_radius, T, filename_positive_out, filename_negative_out, &
+NAMELIST /namelist_config/ filename_constants, filename_radius, sigma, V_m, T, filename_positive_out, filename_negative_out, &
     filename_data, error_code_NA, filename_data_out, filename_absolute_out, filename_relative_out
-NAMELIST /namelist_constants/ sigma, V_m, R, zero_celsius
-! Get configurations from namelist file if possible, otherwise ask throught terminal.
+NAMELIST /namelist_constants/ R, zero_celsius
+! Get configurations from namelist file if possible, otherwise ask throught prompt.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) FILENAME_CONFIG
     CLOSE(UNIT_INPUT)  ! Close here to allow reopening for writing.
     CALL get_filename(filename_constants, 'physical constants', 'READ')
     CALL get_filename(filename_radius, 'surface radius values', 'READ')
+    WRITE(*, *) 'Insert value of surface tension in N m-1:'
+    READ(*, *) sigma
+    WRITE(*, *) 'Insert value of molar volume in m3 mol-1 of the gas:'
+    READ(*, *) V_m
     WRITE(*, *) 'Insert value of temperature in K to evaluate the vapor pressure ratio:'
     READ(*, *) T
     CALL get_filename(filename_positive_out, 'vapor pressure ratio for convex surfaces', 'WRITE')
@@ -46,31 +50,42 @@ IF (iostat_input .NE. 0) THEN
     CALL get_filename(filename_data_out, 'humidity and critical humidity', 'WRITE')
     CALL get_filename(filename_absolute_out, 'absolute count of days with various humidity values', 'WRITE')
     CALL get_filename(filename_relative_out, 'relative count of days with various humidity values', 'WRITE')
-    OPEN(UNIT=UNIT_OUTPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
     ! Write new configurations to namelist file.
+    OPEN(UNIT=UNIT_OUTPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
     IF (iostat_output .NE. 0) THEN
         WRITE(*, 100) FILENAME_CONFIG
-        WRITE(*, *) 'Inserted configurations are not saved on disk'
+        WRITE(*, *) 'Inserted configurations are not saved to disk'
     ELSE
         WRITE(UNIT_OUTPUT, NML=namelist_config)
+        WRITE(*, *) 'Inserted configurations are saved to disk'
     END IF
     CLOSE(UNIT_OUTPUT)
 ELSE
     READ(UNIT_INPUT, NML=namelist_config)
     CLOSE(UNIT_INPUT)
 END IF
-! Get physical constants from namelist file if possible, otherwise set error code.
-sigma = error_code_NA
-V_m = error_code_NA
-R = error_code_NA
-zero_celsius = error_code_NA
+! Get physical constants from namelist file if possible, otherwise use default values.
+R = 8.314510_WK  ! J mol-1 K-1
+zero_celsius = 273.15_WK  ! K
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_constants), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_constants)
+    WRITE(*, *) 'Default values are used instead'
+    CLOSE(UNIT_INPUT)  ! Close here to allow reopening for writing.
+    ! Write physical constants to namelist file.
+    OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_constants), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
+    IF (iostat_output .NE. 0) THEN
+        WRITE(*, 100) TRIM(filename_constants)
+        WRITE(*, *) 'Actual values of physical constants are not saved to disk'
+    ELSE
+        WRITE(UNIT_OUTPUT, NML=namelist_constants)
+        WRITE(*, *) 'Actual values of physical constants are saved to disk'
+    END IF
+    CLOSE(UNIT_OUTPUT)
 ELSE
     READ(UNIT_INPUT, NML=namelist_constants)
+    CLOSE(UNIT_INPUT)
 END IF
-CLOSE(UNIT_INPUT)
 ! Point 1.
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_radius), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN

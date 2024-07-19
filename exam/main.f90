@@ -31,7 +31,7 @@ NAMELIST /namelist_config/ filename_constants, filename_radius, T, filename_posi
 NAMELIST /namelist_constants/ sigma, V_m, R, zero_celsius
 ! Read configurations.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
-IF (iostat_input /= 0) THEN
+IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) FILENAME_CONFIG
     CLOSE(UNIT_INPUT)  ! Close here to allow repoening for writing.
     CALL get_filename(filename_constants, 'physical constants', 'READ')
@@ -47,7 +47,7 @@ IF (iostat_input /= 0) THEN
     CALL get_filename(filename_absolute_out, 'absolute count of days with various humidity values', 'WRITE')
     CALL get_filename(filename_relative_out, 'relative count of days with various humidity values', 'WRITE')
     OPEN(UNIT=UNIT_OUTPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
-    IF (iostat_output /= 0) THEN
+    IF (iostat_output .NE. 0) THEN
         WRITE(*, 100) FILENAME_CONFIG
         WRITE(*, *) 'Inserted configurations are not saved on disk'
     ELSE
@@ -64,7 +64,7 @@ V_m = error_code_NA
 R = error_code_NA
 zero_celsius = error_code_NA
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_constants), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
-IF (iostat_input /= 0) THEN
+IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_constants)
 ELSE
     READ(UNIT_INPUT, NML=namelist_constants)
@@ -72,26 +72,26 @@ END IF
 CLOSE(UNIT_INPUT)
 ! Point 1.
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_radius), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
-IF (iostat_input /= 0) THEN
+IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_radius)
     CLOSE(UNIT_INPUT)
 ELSE
     size_radius = count_lines(UNIT_INPUT)
     ALLOCATE(radius(size_radius), STAT=stat_allocate)
-    IF (stat_allocate > 0) THEN
+    IF (stat_allocate .GT. 0) THEN
         WRITE(*, 101) 'surface radius values'
     ELSE
         READ(UNIT_INPUT, *, IOSTAT=iostat_read) radius
         CLOSE(UNIT_INPUT)  ! Close here to free resource as soon as it is no more needed.
-        IF (iostat_read /= 0) THEN
+        IF (iostat_read .NE. 0) THEN
             WRITE(*, 102) 'surface radius values'
         ELSE
             ! Work on convex surfaces.
             ALLOCATE(ratio_positive(size_radius), STAT=stat_allocate)
             OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_positive_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
-            IF (stat_allocate > 0) THEN
+            IF (stat_allocate .GT. 0) THEN
                 WRITE(*, 101) 'vapor pressure ratio for convex surfaces'
-            ELSE IF (iostat_output /= 0) THEN
+            ELSE IF (iostat_output .NE. 0) THEN
                 WRITE(*, 100) TRIM(filename_positive_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
@@ -111,9 +111,9 @@ ELSE
             ! Work on concave surfaces.
             ALLOCATE(ratio_negative(size_radius), STAT=stat_allocate)
             OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_negative_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
-            IF (stat_allocate > 0) THEN
+            IF (stat_allocate .GT. 0) THEN
                 WRITE(*, 101) 'vapor pressure ratio for convex surfaces'
-            ELSE IF (iostat_output /= 0) THEN
+            ELSE IF (iostat_output .NE. 0) THEN
                 WRITE(*, 100) TRIM(filename_negative_out)
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
@@ -135,7 +135,7 @@ ELSE
 END IF
 ! Point 2, data for point 3 and point 4 are prepared in the same main loop for efficiency.
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_data), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
-IF (iostat_input /= 0) THEN
+IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_data)
 ELSE
     ALLOCATE(batch_date(SIZE_BATCH), STAT=stat_date)
@@ -143,11 +143,11 @@ ELSE
     ALLOCATE(batch_T(SIZE_BATCH), STAT=stat_T)
     ALLOCATE(batch_RH(SIZE_BATCH), STAT=stat_RH)
     ALLOCATE(CRH(size_radius), STAT=stat_CRH)
-    IF (stat_date > 0 .OR. stat_time > 0 .OR. stat_T > 0 .OR. stat_RH > 0 .OR. stat_CRH > 0) THEN
+    IF (stat_date .GT. 0 .OR. stat_time .GT. 0 .OR. stat_T .GT. 0 .OR. stat_RH .GT. 0 .OR. stat_CRH .GT. 0) THEN
         WRITE(*, 101) 'thermohygrometer data'
     ELSE
         OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_data_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
-        IF (iostat_output /= 0) THEN
+        IF (iostat_output .NE. 0) THEN
             WRITE(*, 100) TRIM(filename_data_out)
             WRITE(*, *) 'Values of critical relative humidity are not printed to file'
             print_data_out = .FALSE.
@@ -164,7 +164,7 @@ ELSE
         ! Prepare arrays for counting absolute and relative occurences of relative humidity above the critical value.
         ALLOCATE(daily_date(n_batch), STAT=stat_date)
         ALLOCATE(daily_greater(n_batch, size_radius), STAT=stat_allocate)
-        IF (stat_date .GT. 0 .OR. stat_allocate > 0) THEN
+        IF (stat_date .GT. 0 .OR. stat_allocate .GT. 0) THEN
             WRITE(*, 101) 'count of days with relative humidity greater than the critical value'
             WRITE(*, *) 'No operations are performed to evaluate related statistics'
             print_absolute_out = .FALSE.
@@ -182,7 +182,7 @@ ELSE
                     batch_time(i)%hour, batch_time(i)%minute, batch_time(i)%second, &
                     dummy_field, batch_T(i), dummy_field, batch_RH(i), dummy_field
                 ! Skip batch on read error.
-                IF (iostat_read /= 0) THEN
+                IF (iostat_read .NE. 0) THEN
                     WRITE(*, 102) 'thermohygrometer data'
                     WRITE(*, *) 'Batch number ', i, ' is skipped'
                     n_skipped_batch = n_skipped_batch + 1
@@ -233,30 +233,30 @@ IF (print_absolute_out) THEN
     OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_absolute_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
     OPEN(UNIT=UNIT_OUTPUT_RELATIVE, FILE=TRIM(filename_relative_out), &
         IOSTAT=iostat_output_relative, ACTION='WRITE', STATUS='REPLACE')
-    IF (iostat_output /= 0) THEN
+    IF (iostat_output .NE. 0) THEN
         WRITE(*, 100) TRIM(filename_absolute_out)
         WRITE(*, *) 'Absolute count of days with humidity values above critical value are not printed to file'
     ELSE
         WRITE(UNIT_OUTPUT, '(A9, 1X, A13, 1X, A15, 1X, A10, 1X, A10)') &
             'raggio', 'RH>RHc_sempre', 'RH>RHc_talvolta', 'RH>RHc_mai', 'RH>RHc_tot'
     END IF
-    IF (iostat_output_relative /= 0) THEN
+    IF (iostat_output_relative .NE. 0) THEN
         WRITE(*, 100) TRIM(filename_relative_out)
         WRITE(*, *) 'Relative count of days with humidity values above critical value are not printed to file'
     ELSE
         WRITE(UNIT_OUTPUT_RELATIVE, '(A9, 1X, A16, 1X, A18, 1X, A13)') &
             'raggio', 'RH>RHc_sempre(%)', 'RH>RHc_talvolta(%)', 'RH>RHc_mai(%)'
     END IF
-    IF (iostat_output == 0 .AND. iostat_output_relative == 0) THEN
+    IF (iostat_output .EQ. 0 .AND. iostat_output_relative .EQ. 0) THEN
         DO i = 1, size_radius, 1
             c_always = COUNT(daily_greater(:, i) .EQ. SIZE_BATCH)  ! Due to regularity of data, day length is known a priori.
             c_sometimes = COUNT(0 .LT. daily_greater(:, i) .AND. daily_greater(:, i) .LT. SIZE_BATCH)
             c_never = COUNT(daily_greater(:, i) .EQ. 0)
-            IF (iostat_output == 0) THEN
+            IF (iostat_output .EQ. 0) THEN
             WRITE(UNIT_OUTPUT, '(E9.3E2, 1X, I4, 11X, I4, 11X, I4, 7X, I4)') &
                 radius(i), c_always, c_sometimes, c_never, c_always + c_sometimes + c_never
             END IF
-            IF (iostat_output_relative == 0) THEN
+            IF (iostat_output_relative .EQ. 0) THEN
             WRITE(UNIT_OUTPUT_RELATIVE, '(E9.3E2, 3X, F6.2, 10X, F6.2, 15X, F6.2)') &
                 radius(i), 100.0_WK * c_always / n_batch, 100.0_WK * c_sometimes / n_batch, 100.0_WK * c_never / n_batch
             END IF

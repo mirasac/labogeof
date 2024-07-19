@@ -13,7 +13,7 @@ REAL(KIND=WK) :: T, zero_celsius  ! K
 REAL(KIND=WK) :: error_code_NA
 INTEGER :: iostat_input, iostat_output, iostat_read, iostat_output_relative  ! Variables for IOSTAT.
 INTEGER :: stat_allocate, stat_date, stat_time, stat_T, stat_RH, stat_CRH  ! Variables for STAT.
-INTEGER :: size_radius, i, size_data, n_batch, i_batch, n_skipped_batch, i_day, c_always, c_sometimes, c_never
+INTEGER :: size_radius, i, size_data, n_batch, i_batch, n_skipped_batch, i_day, n_day, c_always, c_sometimes, c_never
 REAL(KIND=WK) :: sigma  ! N m-1
 REAL(KIND=WK) :: V_m  ! m3 mol-1
 REAL(KIND=WK) :: R  ! J mol-1 K-1
@@ -231,6 +231,7 @@ ELSE
             END DO
         END DO
         CLOSE(UNIT_OUTPUT)
+        n_day = n_batch - n_skipped_batch
     END IF
 END IF
 CLOSE(UNIT_INPUT)
@@ -279,7 +280,7 @@ IF (print_absolute_out) THEN
             END IF
             IF (iostat_output_relative .EQ. 0) THEN
             WRITE(UNIT_OUTPUT_RELATIVE, '(E9.3E2, 3X, F6.2, 10X, F6.2, 15X, F6.2)') &
-                radius(i), 100.0_WK * c_always / n_batch, 100.0_WK * c_sometimes / n_batch, 100.0_WK * c_never / n_batch
+                radius(i), 100.0_WK * c_always / n_day, 100.0_WK * c_sometimes / n_day, 100.0_WK * c_never / n_day
             END IF
         END DO
     END IF

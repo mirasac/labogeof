@@ -6,11 +6,12 @@ IMPLICIT NONE
 CHARACTER(LEN=10), PARAMETER :: FILENAME_CONFIG = 'config.nml'
 INTEGER, PARAMETER :: UNIT_INPUT = 30
 INTEGER, PARAMETER :: UNIT_OUTPUT = 31
+INTEGER, PARAMETER :: UNIT_OUTPUT_RELATIVE = 32
 CHARACTER(LEN=PATH_MAX) :: filename_constants, filename_radius, filename_positive_out, filename_negative_out, &
     filename_data, filename_data_out, filename_absolute_out, filename_relative_out
 REAL(KIND=WK) :: T, zero_celsius  ! K
 REAL(KIND=WK) :: error_code_NA
-INTEGER :: iostat_input, iostat_output, iostat_read  ! Variables for IOSTAT.
+INTEGER :: iostat_input, iostat_output, iostat_read, iostat_output_relative  ! Variables for IOSTAT.
 INTEGER :: stat_allocate, stat_date, stat_time, stat_T, stat_RH, stat_CRH  ! Variables for STAT.
 INTEGER :: size_radius, i, size_data, n_batch, i_batch, n_skipped_batch, i_day, c_always, c_sometimes, c_never
 REAL(KIND=WK) :: sigma  ! N m-1
@@ -160,7 +161,7 @@ ELSE
         READ(UNIT_INPUT, *) dummy_field
         READ(UNIT_INPUT, *) dummy_field
         n_batch = INT(size_data / SIZE_BATCH)  ! Equal to number of days due to data being always provided complete.
-        ! Prepare arrays for counting absolute and relative occurences of relative humidity over the critical value.
+        ! Prepare arrays for counting absolute and relative occurences of relative humidity above the critical value.
         ALLOCATE(daily_date(n_batch), STAT=stat_date)
         ALLOCATE(daily_greater(n_batch, size_radius), STAT=stat_allocate)
         IF (stat_date .GT. 0 .OR. stat_allocate > 0) THEN
@@ -204,7 +205,7 @@ ELSE
                         batch_date(i)%day, batch_date(i)%month, batch_date(i)%year, &
                         batch_time(i)%hour, batch_time(i)%minute, batch_RH(i), CRH
                 END IF
-                ! Count occurences of relative humidity over the critical value in the same day.
+                ! Count occurences of relative humidity above the critical value in the same day.
                 IF (print_absolute_out) THEN
                     i_day = i_batch  ! Due to program design, no further operations are needed to identify a day.
                     daily_date(i_day) = batch_date(1)  ! Since a batch corresponds to a day, simply select any date.
@@ -230,20 +231,39 @@ CLOSE(UNIT_INPUT)
 ! Point 3.
 IF (print_absolute_out) THEN
     OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_absolute_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
+    OPEN(UNIT=UNIT_OUTPUT_RELATIVE, FILE=TRIM(filename_relative_out), &
+        IOSTAT=iostat_output_relative, ACTION='WRITE', STATUS='REPLACE')
     IF (iostat_output /= 0) THEN
         WRITE(*, 100) TRIM(filename_absolute_out)
+        WRITE(*, *) 'Absolute count of days with humidity values above critical value are not printed to file'
     ELSE
         WRITE(UNIT_OUTPUT, '(A9, 1X, A13, 1X, A15, 1X, A10, 1X, A10)') &
             'raggio', 'RH>RHc_sempre', 'RH>RHc_talvolta', 'RH>RHc_mai', 'RH>RHc_tot'
+    END IF
+    IF (iostat_output_relative /= 0) THEN
+        WRITE(*, 100) TRIM(filename_relative_out)
+        WRITE(*, *) 'Relative count of days with humidity values above critical value are not printed to file'
+    ELSE
+        WRITE(UNIT_OUTPUT_RELATIVE, '(A9, 1X, A16, 1X, A18, 1X, A13)') &
+            'raggio', 'RH>RHc_sempre(%)', 'RH>RHc_talvolta(%)', 'RH>RHc_mai(%)'
+    END IF
+    IF (iostat_output == 0 .AND. iostat_output_relative == 0) THEN
         DO i = 1, size_radius, 1
             c_always = COUNT(daily_greater(:, i) .EQ. SIZE_BATCH)  ! Due to regularity of data, day length is known a priori.
             c_sometimes = COUNT(0 .LT. daily_greater(:, i) .AND. daily_greater(:, i) .LT. SIZE_BATCH)
             c_never = COUNT(daily_greater(:, i) .EQ. 0)
+            IF (iostat_output == 0) THEN
             WRITE(UNIT_OUTPUT, '(E9.3E2, 1X, I4, 11X, I4, 11X, I4, 7X, I4)') &
                 radius(i), c_always, c_sometimes, c_never, c_always + c_sometimes + c_never
+            END IF
+            IF (iostat_output_relative == 0) THEN
+            WRITE(UNIT_OUTPUT_RELATIVE, '(E9.3E2, 3X, F6.2, 10X, F6.2, 15X, F6.2)') &
+                radius(i), 100.0_WK * c_always / n_batch, 100.0_WK * c_sometimes / n_batch, 100.0_WK * c_never / n_batch
+            END IF
         END DO
     END IF
     CLOSE(UNIT_OUTPUT)
+    CLOSE(UNIT_OUTPUT_RELATIVE)
 END IF
 IF (ALLOCATED(radius)) THEN
     DEALLOCATE(radius)

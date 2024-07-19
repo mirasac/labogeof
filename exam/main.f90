@@ -31,7 +31,7 @@ NAMELIST /namelist_constants/ sigma, V_m, R, zero_celsius
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input /= 0) THEN
     WRITE(*, 100) FILENAME_CONFIG
-    CLOSE(UNIT_INPUT)
+    CLOSE(UNIT_INPUT)  ! Close here to allow repoening for writing.
     CALL get_filename(filename_constants, 'physical constants', 'READ')
     CALL get_filename(filename_radius, 'surface radius values', 'READ')
     WRITE(*, *) 'Insert value of temperature in K to evaluate the vapor pressure ratio:'
@@ -80,7 +80,7 @@ ELSE
         WRITE(*, 101) 'surface radius values'
     ELSE
         READ(UNIT_INPUT, *, IOSTAT=iostat_radius) radius
-        CLOSE(UNIT_INPUT)
+        CLOSE(UNIT_INPUT)  ! Close here to free resource as soon as it is no more needed.
         IF (iostat_radius /= 0) THEN
             WRITE(*, 102) 'surface radius values'
         ELSE
@@ -191,6 +191,7 @@ ELSE
                 END IF
             END DO
         END DO
+        CLOSE(UNIT_OUTPUT)
     END IF
 END IF
 CLOSE(UNIT_INPUT)

@@ -305,6 +305,12 @@ END IF
 IF (ALLOCATED(radius)) THEN
     DEALLOCATE(radius)
 END IF
+IF (ALLOCATED(daily_greater)) THEN
+    DEALLOCATE(daily_greater)
+END IF
+IF (ALLOCATED(daily_date)) THEN
+    DEALLOCATE(daily_date)
+END IF
 100 FORMAT('Error opening file ', A)
 101 FORMAT('Error allocating memory for ', A)
 102 FORMAT('Error reading ', A)

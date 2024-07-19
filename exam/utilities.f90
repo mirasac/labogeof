@@ -1,7 +1,7 @@
 MODULE utilities
 IMPLICIT NONE
 PRIVATE
-PUBLIC :: PATH_MAX, DP, SP, EPS
+PUBLIC :: PATH_MAX, DP, SP, SIZE_BATCH, EPS
 PUBLIC :: date_t, time_t
 PUBLIC :: get_filename, count_lines
 INTEGER, PARAMETER :: PATH_MAX = 259  ! Maximum number of characters in absolute paths.
@@ -9,7 +9,8 @@ INTEGER, PARAMETER :: CHAR_MAX = 80  ! Maximum number of characters displayed in
 INTEGER, PARAMETER :: DP = SELECTED_REAL_KIND(15, 307)  ! Minimum precision and range of IEEE 754 double-precision floating-point format.
 INTEGER, PARAMETER :: SP = SELECTED_REAL_KIND(6, 38)  ! Minimum precision and range of IEEE 754 single-precision floating-point format.
 INTEGER, PARAMETER :: WK = SP  ! Working kind.
-REAL(KIND=WK), PARAMETER :: EPS = TINY(1.0_WK)  ! Machine epsilon.
+INTEGER, PARAMETER :: SIZE_BATCH = 144  ! Number of data to process at the same time.
+REAL(KIND=WK), PARAMETER :: EPS = EPSILON(1.0_WK)  ! Machine epsilon.
 TYPE :: date_t
     INTEGER :: year
     INTEGER :: month

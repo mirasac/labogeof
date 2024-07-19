@@ -18,7 +18,7 @@ REAL(KIND=WK) :: sigma  ! N m-1
 REAL(KIND=WK) :: V_m  ! m3 mol-1
 REAL(KIND=WK) :: R  ! J mol-1 K-1
 REAL(KIND=WK), ALLOCATABLE :: radius(:)  ! m
-REAL(KIND=WK), ALLOCATABLE :: ratio_positive(:), ratio_negative(:)  ! MC delete because I evaluate in DO loop.
+REAL(KIND=WK), ALLOCATABLE :: ratio_positive(:), ratio_negative(:)
 TYPE(date_t), ALLOCATABLE :: batch_date(:), daily_date(:)
 TYPE(time_t), ALLOCATABLE :: batch_time(:)
 REAL(KIND=WK), ALLOCATABLE :: batch_T(:)  ! K
@@ -29,11 +29,11 @@ INTEGER, ALLOCATABLE :: daily_greater(:, :)
 NAMELIST /namelist_config/ filename_constants, filename_radius, T, filename_positive_out, filename_negative_out, &
     filename_data, error_code_NA, filename_data_out, filename_absolute_out, filename_relative_out
 NAMELIST /namelist_constants/ sigma, V_m, R, zero_celsius
-! Read configurations.
+! Get configurations from namelist file if possible, otherwise ask throught terminal.
 OPEN(UNIT=UNIT_INPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) FILENAME_CONFIG
-    CLOSE(UNIT_INPUT)  ! Close here to allow repoening for writing.
+    CLOSE(UNIT_INPUT)  ! Close here to allow reopening for writing.
     CALL get_filename(filename_constants, 'physical constants', 'READ')
     CALL get_filename(filename_radius, 'surface radius values', 'READ')
     WRITE(*, *) 'Insert value of temperature in K to evaluate the vapor pressure ratio:'
@@ -47,6 +47,7 @@ IF (iostat_input .NE. 0) THEN
     CALL get_filename(filename_absolute_out, 'absolute count of days with various humidity values', 'WRITE')
     CALL get_filename(filename_relative_out, 'relative count of days with various humidity values', 'WRITE')
     OPEN(UNIT=UNIT_OUTPUT, FILE=FILENAME_CONFIG, IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
+    ! Write new configurations to namelist file.
     IF (iostat_output .NE. 0) THEN
         WRITE(*, 100) FILENAME_CONFIG
         WRITE(*, *) 'Inserted configurations are not saved on disk'
@@ -58,7 +59,7 @@ ELSE
     READ(UNIT_INPUT, NML=namelist_config)
     CLOSE(UNIT_INPUT)
 END IF
-! Read physical constant.
+! Get physical constants from namelist file if possible, otherwise set error code.
 sigma = error_code_NA
 V_m = error_code_NA
 R = error_code_NA
@@ -74,25 +75,29 @@ CLOSE(UNIT_INPUT)
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_radius), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_radius)
+        WRITE(*, 105) ''
     CLOSE(UNIT_INPUT)
 ELSE
     size_radius = count_lines(UNIT_INPUT)
     ALLOCATE(radius(size_radius), STAT=stat_allocate)
     IF (stat_allocate .GT. 0) THEN
         WRITE(*, 101) 'surface radius values'
+        WRITE(*, 105) ''
     ELSE
         READ(UNIT_INPUT, *, IOSTAT=iostat_read) radius
         CLOSE(UNIT_INPUT)  ! Close here to free resource as soon as it is no more needed.
         IF (iostat_read .NE. 0) THEN
             WRITE(*, 102) 'surface radius values'
+            WRITE(*, 105) ''
         ELSE
             ! Work on convex surfaces.
             ALLOCATE(ratio_positive(size_radius), STAT=stat_allocate)
             OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_positive_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
             IF (stat_allocate .GT. 0) THEN
-                WRITE(*, 101) 'vapor pressure ratio for convex surfaces'
+                WRITE(*, 101) 'vapor pressure ratio for convex surfaces, no evaluation is performed'
             ELSE IF (iostat_output .NE. 0) THEN
                 WRITE(*, 100) TRIM(filename_positive_out)
+                WRITE(*, 105) 'for convex surfaces'
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
                 WHERE (ABS(radius - 0.0_WK) .LT. EPS)
@@ -112,9 +117,10 @@ ELSE
             ALLOCATE(ratio_negative(size_radius), STAT=stat_allocate)
             OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_negative_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
             IF (stat_allocate .GT. 0) THEN
-                WRITE(*, 101) 'vapor pressure ratio for convex surfaces'
+                WRITE(*, 101) 'vapor pressure ratio for convex surfaces, no evaluation is performed'
             ELSE IF (iostat_output .NE. 0) THEN
                 WRITE(*, 100) TRIM(filename_negative_out)
+                WRITE(*, 105) 'for concave surfaces'
             ELSE
                 WRITE(UNIT_OUTPUT, 103) 'raggio', 'ew(r)/ew(inf)'
                 WHERE (ABS(radius - 0.0_WK) .LT. EPS)
@@ -134,6 +140,7 @@ ELSE
     END IF
 END IF
 ! Point 2, data for point 3 and point 4 are prepared in the same main loop for efficiency.
+print_absolute_out = .FALSE.
 OPEN(UNIT=UNIT_INPUT, FILE=TRIM(filename_data), IOSTAT=iostat_input, ACTION='READ', STATUS='OLD')
 IF (iostat_input .NE. 0) THEN
     WRITE(*, 100) TRIM(filename_data)
@@ -144,7 +151,7 @@ ELSE
     ALLOCATE(batch_RH(SIZE_BATCH), STAT=stat_RH)
     ALLOCATE(CRH(size_radius), STAT=stat_CRH)
     IF (stat_date .GT. 0 .OR. stat_time .GT. 0 .OR. stat_T .GT. 0 .OR. stat_RH .GT. 0 .OR. stat_CRH .GT. 0) THEN
-        WRITE(*, 101) 'thermohygrometer data'
+        WRITE(*, 101) 'thermohygrometer data, no evaluation is performed'
     ELSE
         OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_data_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
         IF (iostat_output .NE. 0) THEN
@@ -167,7 +174,6 @@ ELSE
         IF (stat_date .GT. 0 .OR. stat_allocate .GT. 0) THEN
             WRITE(*, 101) 'count of days with relative humidity greater than the critical value'
             WRITE(*, *) 'No operations are performed to evaluate related statistics'
-            print_absolute_out = .FALSE.
         ELSE
             print_absolute_out = .TRUE.
             daily_greater = 0
@@ -228,7 +234,22 @@ ELSE
     END IF
 END IF
 CLOSE(UNIT_INPUT)
-! Point 3.
+IF (ALLOCATED(batch_date)) THEN
+    DEALLOCATE(batch_date)
+END IF
+IF (ALLOCATED(batch_time)) THEN
+    DEALLOCATE(batch_time)
+END IF
+IF (ALLOCATED(batch_T)) THEN
+    DEALLOCATE(batch_T)
+END IF
+IF (ALLOCATED(batch_RH)) THEN
+    DEALLOCATE(batch_RH)
+END IF
+IF (ALLOCATED(CRH)) THEN
+    DEALLOCATE(CRH)
+END IF
+! Write output files of point 3 and point 4.
 IF (print_absolute_out) THEN
     OPEN(UNIT=UNIT_OUTPUT, FILE=TRIM(filename_absolute_out), IOSTAT=iostat_output, ACTION='WRITE', STATUS='REPLACE')
     OPEN(UNIT=UNIT_OUTPUT_RELATIVE, FILE=TRIM(filename_relative_out), &
@@ -268,24 +289,10 @@ END IF
 IF (ALLOCATED(radius)) THEN
     DEALLOCATE(radius)
 END IF
-IF (ALLOCATED(batch_date)) THEN
-    DEALLOCATE(batch_date)
-END IF
-IF (ALLOCATED(batch_time)) THEN
-    DEALLOCATE(batch_time)
-END IF
-IF (ALLOCATED(batch_T)) THEN
-    DEALLOCATE(batch_T)
-END IF
-IF (ALLOCATED(batch_RH)) THEN
-    DEALLOCATE(batch_RH)
-END IF
-IF (ALLOCATED(CRH)) THEN
-    DEALLOCATE(CRH)
-END IF
 100 FORMAT('Error opening file ', A)
 101 FORMAT('Error allocating memory for ', A)
 102 FORMAT('Error reading ', A)
-103 FORMAT(A12, 1X, A)
-104 FORMAT(E12.5E3, 1X, F5.3)
+103 FORMAT(A11, 1X, A)
+104 FORMAT(E11.5E2, 1X, F5.3)
+105 FORMAT('No vapor pressure ratio is evaluated ', A)
 END PROGRAM main
